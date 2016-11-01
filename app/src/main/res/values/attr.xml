@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="shape">
+        <enum name="ring" value="0"/>
+        <enum name="sector" value="1"/>
+    </attr>
+    <attr name="outerRadius" format="dimension"/>
+    <attr name="ringWidth" format="dimension"/>
+    <attr name="outerRingColor" format="color|reference"/>
+    <attr name="innerCircleColor" format="color|reference"/>
+    <attr name="outerRingBackgroundColor" format="color|reference"/>
+    <!-- textView attributes -->
+    <attr name="text" format="string"/>
+    <attr name="textDisplay" format="boolean"/>
+    <attr name="textSize" format="dimension"/>
+    <attr name="textColor" format="color|reference"/>
+    <attr name= "textStyle">
+        <enum name= "normal" value ="0" />
+        <enum name= "bold" value ="1" />
+        <enum name= "italic" value ="2" />
+    </attr>
+    <attr name= "textAlign">
+        <enum name= "left" value ="0" />
+        <enum name= "center" value ="1" />
+        <enum name= "right" value ="2" />
+    </attr>
+    <attr name="max" format="integer"/>
+
+    <declare-styleable name="CustomCircleView">
+        <!-- circle attributes -->
+        <attr name="shape"/>
+        <attr name="outerRadius"/>
+        <attr name="ringWidth" />
+        <attr name="outerRingColor"/>
+        <attr name="innerCircleColor"/>
+        <attr name="outerRingBackgroundColor"/>
+        <!-- textView attributes -->
+        <attr name="text"/>
+        <attr name="textDisplay"/>
+        <attr name="textSize"/>
+        <attr name="textColor"/>
+        <attr name= "textStyle"/>
+        <attr name= "textAlign"/>
+        <attr name="max"/>
+    </declare-styleable>
+
+</resources>
