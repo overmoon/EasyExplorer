@@ -11,10 +11,11 @@
     <fun.my.easyexplorer.ui.view.CustomCircleView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        custom:ringWidth="2dp"
-        custom:outerRadius="25dp"
+        custom:ringWidth="5dp"
+        custom:outerRadius="55dp"
         custom:shape="ring"
-        custom:innerCircleColor="@color/colorPrimaryDark"
+        custom:percent="0.58"
+        custom:innerCircleColor="#ffffffff"
         custom:outerRingColor="@color/colorPrimary"/>
 </LinearLayout>
 

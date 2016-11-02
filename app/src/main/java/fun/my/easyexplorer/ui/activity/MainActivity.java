@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
     }
 
     protected void initViews(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_fileexplorer);
+        setContentView(R.layout.mount_recycler_item);
 
     }
 

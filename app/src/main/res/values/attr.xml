@@ -13,6 +13,7 @@
     <!-- textView attributes -->
     <attr name="text" format="string"/>
     <attr name="textDisplay" format="boolean"/>
+    <attr name="percentDisplay" format="boolean"/>
     <attr name="textSize" format="dimension"/>
     <attr name="textColor" format="color|reference"/>
     <attr name= "textStyle">
@@ -25,7 +26,10 @@
         <enum name= "center" value ="1" />
         <enum name= "right" value ="2" />
     </attr>
-    <attr name="max" format="integer"/>
+    <attr name="max" format="float"/>
+    <attr name="process" format="float"/>
+    <attr name="percent" format="float"/>
+    <attr name="duration" format="integer"/>
 
     <declare-styleable name="CustomCircleView">
         <!-- circle attributes -->
@@ -38,11 +42,15 @@
         <!-- textView attributes -->
         <attr name="text"/>
         <attr name="textDisplay"/>
+        <attr name="percentDisplay"/>
         <attr name="textSize"/>
         <attr name="textColor"/>
         <attr name= "textStyle"/>
         <attr name= "textAlign"/>
         <attr name="max"/>
+        <attr name="process"/>
+        <attr name="duration"/>
+        <attr name="percent"/>
     </declare-styleable>
 
 </resources>
