@@ -1,20 +1,7 @@
 package fun.my.easyexplorer.ui.activity;
 
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
-
-import java.io.File;
-import java.util.List;
-
-import fun.my.easyexplorer.R;
-import fun.my.easyexplorer.model.MountPoint;
 
 public class MainActivity extends Activity {
 
@@ -31,10 +18,25 @@ public class MainActivity extends Activity {
     }
 
     protected void initViews(Bundle savedInstanceState) {
-        setContentView(R.layout.mount_recycler_item);
 
     }
 
+    /*
+     protected void initViews(Bundle savedInstanceState) {
+           setContentView(R.layout.mount_recycler_item);
+           final CustomCircleView customCircleView = (CustomCircleView) findViewById(R.id.customCircleView);
+           customCircleView.setmPercent(0.8f);
+
+           Button button = (Button) findViewById(R.id.change);
+           button.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                   double percent = Math.random();
+                   customCircleView.setmPercent((float) percent);
+               }
+           });
+       }
+   */
     protected void loadData() {
 
     }

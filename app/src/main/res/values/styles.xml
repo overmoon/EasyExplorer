@@ -3,16 +3,41 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="myTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Blue" parent="AppTheme">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="myColorPrimaryLight">@color/colorPrimaryLight_blue</item>
+        <item name="myColorPrimary">@color/colorPrimary_blue</item>
+        <item name="myColorPrimaryDark">@color/colorPrimaryDark_blue</item>
+        <item name="myColorText">@color/colorText_blue</item>
+        <item name="myColorAccent">@color/colorAccent_blue</item>
+        <item name="myColorPrimaryText">@color/colorPrimaryText_blue</item>
+        <item name="myColorSecondaryText">@color/colorSecondaryText_blue</item>
+        <item name="myColorDivider">@color/colorDivider_blue</item>
     </style>
 
+    <style name="Theme.Gray" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="myColorPrimaryLight">@color/colorPrimaryLight_gray</item>
+        <item name="myColorPrimary">@color/colorPrimary_gray</item>
+        <item name="myColorPrimaryDark">@color/colorPrimaryDark_gray</item>
+        <item name="myColorText">@color/colorText_gray</item>
+        <item name="myColorAccent">@color/colorAccent_gray</item>
+        <item name="myColorPrimaryText">@color/colorPrimaryText_gray</item>
+        <item name="myColorSecondaryText">@color/colorSecondaryText_gray</item>
+        <item name="myColorDivider">@color/colorDivider_gray</item>
+    </style>
+
+    <style name="Theme.Blue.Gray" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="myColorPrimaryLight">@color/colorPrimaryLight_blue_gray</item>
+        <item name="myColorPrimary">@color/colorPrimary_blue_gray</item>
+        <item name="myColorPrimaryDark">@color/colorPrimaryDark_blue_gray</item>
+        <item name="myColorText">@color/colorText_blue_gray</item>
+        <item name="myColorAccent">@color/colorAccent_blue_gray</item>
+        <item name="myColorPrimaryText">@color/colorPrimaryText_blue_gray</item>
+        <item name="myColorSecondaryText">@color/colorSecondaryText_blue_gray</item>
+        <item name="myColorDivider">@color/colorDivider_blue_gray</item>
+    </style>
 </resources>

@@ -190,7 +190,7 @@ public class FileExplorerActivity extends BaseActivity {
         View dialog = layoutInflater.inflate(R.layout.dialog, (ViewGroup) findViewById(R.id.dialog));
         ListView listView = (ListView) dialog.findViewById(R.id.dialog_listView);
         final String[] strings = getResources().getStringArray(R.array.mimeType_array);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.mount_recycler_item, strings);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.main_recycler_item1, strings);
         listView.setAdapter(arrayAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

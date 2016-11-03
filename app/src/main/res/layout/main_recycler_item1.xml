@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingBottom="15dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    android:paddingTop="15dp"
+    android:gravity="center_vertical"
+    android:background="@drawable/item_selector"
+    >
+
+    <fun.my.easyexplorer.ui.view.CustomCircleView
+        android:id="@+id/customCircleView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        custom:innerCircleColor="?attr/myColorPrimaryDark"
+        custom:outerRadius="35dp"
+        custom:outerRingBackgroundColor="?attr/myColorPrimaryDark"
+        custom:outerRingColor="?attr/colorPrimary"
+        custom:ringWidth="3dp"
+        custom:textSize="15sp"
+        custom:shape="ring" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/deviceTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/capacityTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/pathTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</LinearLayout>
+
+
+
+

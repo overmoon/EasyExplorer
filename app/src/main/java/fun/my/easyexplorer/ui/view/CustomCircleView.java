@@ -91,12 +91,12 @@ public class CustomCircleView extends View {
 
         mOuterRingColor = typedArray.getColor(R.styleable.CustomCircleView_outerRingColor, 0);
         if (mOuterRingColor == 0) {
-            mOuterRingColor = typedArray.getResourceId(R.styleable.CustomCircleView_outerRingColor, R.color.colorPrimaryDark);
+            mOuterRingColor = typedArray.getResourceId(R.styleable.CustomCircleView_outerRingColor, R.attr.myColorPrimaryDark);
         }
 
         mOuterRingBackgroundColor = typedArray.getColor(R.styleable.CustomCircleView_outerRingBackgroundColor, 0);
         if (mOuterRingBackgroundColor == 0) {
-            mOuterRingBackgroundColor = typedArray.getResourceId(R.styleable.CustomCircleView_outerRingBackgroundColor, R.color.transparent);
+            mOuterRingBackgroundColor = typedArray.getResourceId(R.styleable.CustomCircleView_outerRingBackgroundColor, 0);
         }
 
         mTextColor = typedArray.getColor(R.styleable.CustomCircleView_textColor, 0);
@@ -116,7 +116,7 @@ public class CustomCircleView extends View {
         mMax = typedArray.getFloat(R.styleable.CustomCircleView_max, 0);
         mProcess = typedArray.getFloat(R.styleable.CustomCircleView_process, 0);
         mPercent = typedArray.getFloat(R.styleable.CustomCircleView_percent, 0);
-        mDuration = typedArray.getInt(R.styleable.CustomCircleView_duration, 0);
+        mDuration = typedArray.getInt(R.styleable.CustomCircleView_duration, 1000);
         typedArray.recycle();
 
         mPaint = new Paint();
@@ -147,21 +147,26 @@ public class CustomCircleView extends View {
         canvas.drawCircle(center_x, center_y, mOuterRadius, mPaint);
 
         RectF rectF = new RectF(center_x - realOuterRadius, center_y - realOuterRadius, center_x + realOuterRadius, center_y + realOuterRadius);
+        if (mPercent > 1 || mPercent < 0)
+            throw new IllegalArgumentException("Percent can not be > 1 or < 0");
+        float angle = mPercent * 360;
+        float leftStartAngle = -90 + angle;
+        float sweepAngle = 360 - angle;
         //外圈背景
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(mRingWidth);
-        if (mOuterRingBackgroundColor != Color.TRANSPARENT  && mOuterRingBackgroundColor != mInnerCircleColor) {
+        if (mOuterRingBackgroundColor != Color.TRANSPARENT && mOuterRingBackgroundColor != mInnerCircleColor) {
             mPaint.setColor(mOuterRingBackgroundColor);
-            canvas.drawArc(rectF, 180, 90, false, mPaint);
+            canvas.drawArc(rectF, leftStartAngle, sweepAngle, false, mPaint);
         }
         mPaint.setColor(mOuterRingColor);
         //根据形状
         switch (mShape) {
             case RING:
-                canvas.drawArc(rectF, -90, 270, false, mPaint);
+                canvas.drawArc(rectF, -90, angle, false, mPaint);
                 break;
             case SECTOR:
-                canvas.drawArc(rectF, -90, 270, true, mPaint);
+                canvas.drawArc(rectF, -90, angle, true, mPaint);
                 break;
         }
 
@@ -178,6 +183,7 @@ public class CustomCircleView extends View {
             mPaint.getTextBounds(mText, 0, mText.length(), bounds);
             canvas.drawText(mText, center_x - bounds.width() / 2, center_y + bounds.height() / 2, mPaint);
         }
+        mPaint.reset();
     }
 
     @Override
@@ -212,4 +218,39 @@ public class CustomCircleView extends View {
 
         setMeasuredDimension(width, height);
     }
+
+    public synchronized void setmPercent(float percent) {
+        if (percent > 1 || percent < 0) {
+            throw new IllegalArgumentException("Percent can not be > 1 or < 0");
+        }
+        //动画
+        percentChange(mPercent, percent, mDuration);
+    }
+
+    public void percentChange(final float prePercent, final float currentPercent, final int duration) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //计算每1%耗时 毫秒
+                int percent = (int) ((currentPercent - prePercent) * 100);
+                int sleepTime = 0;
+                if (percent != 0) {
+                    sleepTime = duration / Math.abs(percent);
+                    sleepTime = sleepTime >15 ? 15 : sleepTime;
+                }
+                float increment = percent > 0 ? 0.01f : -0.01f;
+
+                for (float i = percent; mPercent * increment < currentPercent * increment; i += increment) {
+                    mPercent = mPercent+increment;
+                    postInvalidate();
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
 }

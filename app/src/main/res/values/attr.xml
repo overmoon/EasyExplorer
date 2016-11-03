@@ -31,6 +31,15 @@
     <attr name="percent" format="float"/>
     <attr name="duration" format="integer"/>
 
+    <attr name="myColorPrimaryDark" format="color"/>
+    <attr name="myColorPrimary" format="color"/>
+    <attr name="myColorPrimaryLight" format="color"/>
+    <attr name="myColorText" format="color"/>
+    <attr name="myColorAccent" format="color"/>
+    <attr name="myColorPrimaryText" format="color"/>
+    <attr name="myColorSecondaryText" format="color"/>
+    <attr name="myColorDivider" format="color"/>
+
     <declare-styleable name="CustomCircleView">
         <!-- circle attributes -->
         <attr name="shape"/>
