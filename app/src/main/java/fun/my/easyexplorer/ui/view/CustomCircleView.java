@@ -1,6 +1,8 @@
 package fun.my.easyexplorer.ui.view;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,7 +10,9 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 
 import fun.my.easyexplorer.R;
@@ -77,32 +81,20 @@ public class CustomCircleView extends View {
 
     public CustomCircleView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr);
+        Resources.Theme theme = context.getTheme();
         // 获取属性
-        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CustomCircleView, defStyleAttr, defStyleRes);
+        TypedArray typedArray = theme.obtainStyledAttributes(attrs, R.styleable.CustomCircleView, defStyleAttr, defStyleRes);
+        Resources resources = getResources();
         // 设置属性
         mShape = SHAPE.values()[(typedArray.getInt(R.styleable.CustomCircleView_shape, 0))];
         mOuterRadius = typedArray.getDimension(R.styleable.CustomCircleView_outerRadius, DensityUtils.dip2px(context, 30));
         mRingWidth = typedArray.getDimension(R.styleable.CustomCircleView_ringWidth, DensityUtils.dip2px(context, 3));
-        // 混合属性分别判断
-        mInnerCircleColor = typedArray.getColor(R.styleable.CustomCircleView_innerCircleColor, 0);
-        if (mInnerCircleColor == 0) {
-            mInnerCircleColor = typedArray.getResourceId(R.styleable.CustomCircleView_innerCircleColor, R.color.transparent);
-        }
+        // 混合属性判断
+        mInnerCircleColor = getColor(R.styleable.CustomCircleView_innerCircleColor, typedArray, context, R.attr.myColorPrimaryLight);
+        mOuterRingColor = getColor(R.styleable.CustomCircleView_outerRingColor, typedArray, context, R.attr.myColorPrimaryDark);
+        mOuterRingBackgroundColor = getColor(R.styleable.CustomCircleView_outerRingColor, typedArray, context, 0);
+        mTextColor = getColor(R.styleable.CustomCircleView_outerRingColor, typedArray, context, R.attr.myColorText);
 
-        mOuterRingColor = typedArray.getColor(R.styleable.CustomCircleView_outerRingColor, 0);
-        if (mOuterRingColor == 0) {
-            mOuterRingColor = typedArray.getResourceId(R.styleable.CustomCircleView_outerRingColor, R.attr.myColorPrimaryDark);
-        }
-
-        mOuterRingBackgroundColor = typedArray.getColor(R.styleable.CustomCircleView_outerRingBackgroundColor, 0);
-        if (mOuterRingBackgroundColor == 0) {
-            mOuterRingBackgroundColor = typedArray.getResourceId(R.styleable.CustomCircleView_outerRingBackgroundColor, 0);
-        }
-
-        mTextColor = typedArray.getColor(R.styleable.CustomCircleView_textColor, 0);
-        if (mTextColor == 0) {
-            mTextColor = typedArray.getResourceId(R.styleable.CustomCircleView_textColor, R.color.colorBlack);
-        }
 
         mPercentDisplay = typedArray.getBoolean(R.styleable.CustomCircleView_percentDisplay, true);
         mTextDisplay = typedArray.getBoolean(R.styleable.CustomCircleView_textDisplay, false);
@@ -120,6 +112,30 @@ public class CustomCircleView extends View {
         typedArray.recycle();
 
         mPaint = new Paint();
+    }
+
+    /**
+     * Get color from reference or color
+     * index: styleable index, ex, R.styleable.yourAttr
+     */
+    private int getColor(int index, TypedArray typedArray, Context context, int defaultAttrColor) {
+        Resources.Theme theme = context.getTheme();
+        Resources resources = context.getResources();
+        int color = 0;
+        ColorStateList list = typedArray.getColorStateList(index);
+        if (list == null && defaultAttrColor !=0 ) {
+            TypedValue value = new TypedValue();
+            theme.resolveAttribute(defaultAttrColor, value, true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                color = resources.getColor(value.resourceId, theme);
+            } else {
+                color = resources.getColor(value.resourceId);
+            }
+        }
+        if(list!=null){
+            color = list.getDefaultColor();
+        }
+        return color;
     }
 
     @Override
@@ -166,6 +182,7 @@ public class CustomCircleView extends View {
                 canvas.drawArc(rectF, -90, angle, false, mPaint);
                 break;
             case SECTOR:
+                mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 canvas.drawArc(rectF, -90, angle, true, mPaint);
                 break;
         }
@@ -236,12 +253,12 @@ public class CustomCircleView extends View {
                 int sleepTime = 0;
                 if (percent != 0) {
                     sleepTime = duration / Math.abs(percent);
-                    sleepTime = sleepTime >15 ? 15 : sleepTime;
+                    sleepTime = sleepTime > 15 ? 15 : sleepTime;
                 }
                 float increment = percent > 0 ? 0.01f : -0.01f;
 
                 for (float i = percent; mPercent * increment < currentPercent * increment; i += increment) {
-                    mPercent = mPercent+increment;
+                    mPercent = mPercent + increment;
                     postInvalidate();
                     try {
                         Thread.sleep(sleepTime);

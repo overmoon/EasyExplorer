@@ -11,7 +11,7 @@
     <color name="colorPrimaryDark_blue">#1976D2</color>
     <color name="colorPrimary_blue">#2196F3</color>
     <color name="colorPrimaryLight_blue">#BBDEFB</color>
-    <color name="colorText_blue">#FFFFFF</color>
+    <color name="colorText_blue">#FFFFFFFF</color>
     <color name="colorAccent_blue">#03A9F4</color>
     <color name="colorPrimaryText_blue">#212121</color>
     <color name="colorSecondaryText_blue">#757575</color>
@@ -20,7 +20,7 @@
     <color name="colorPrimaryDark_gray">#616161</color>
     <color name="colorPrimary_gray">#9E9E9E</color>
     <color name="colorPrimaryLight_gray">#F5F5F5</color>
-    <color name="colorText_gray">#212121</color>
+    <color name="colorText_gray">#FF212121</color>
     <color name="colorAccent_gray">#9E9E9E</color>
     <color name="colorPrimaryText_gray">#212121</color>
     <color name="colorSecondaryText_gray">#757575</color>
@@ -29,7 +29,7 @@
     <color name="colorPrimaryDark_blue_gray">#455A64</color>
     <color name="colorPrimary_blue_gray">#607D8B</color>
     <color name="colorPrimaryLight_blue_gray">#CFD8DC</color>
-    <color name="colorText_blue_gray">#FFFFFF</color>
+    <color name="colorText_blue_gray">#FFFFFFFF</color>
     <color name="colorAccent_blue_gray">#607D8B</color>
     <color name="colorPrimaryText_blue_gray">#212121</color>
     <color name="colorSecondaryText_blue_gray">#757575</color>
