@@ -11,6 +11,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.support.annotation.AttrRes;
+import android.support.annotation.StyleableRes;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -84,7 +86,6 @@ public class CustomCircleView extends View {
         Resources.Theme theme = context.getTheme();
         // 获取属性
         TypedArray typedArray = theme.obtainStyledAttributes(attrs, R.styleable.CustomCircleView, defStyleAttr, defStyleRes);
-        Resources resources = getResources();
         // 设置属性
         mShape = SHAPE.values()[(typedArray.getInt(R.styleable.CustomCircleView_shape, 0))];
         mOuterRadius = typedArray.getDimension(R.styleable.CustomCircleView_outerRadius, DensityUtils.dip2px(context, 30));
@@ -94,7 +95,6 @@ public class CustomCircleView extends View {
         mOuterRingColor = getColor(R.styleable.CustomCircleView_outerRingColor, typedArray, context, R.attr.myColorPrimaryDark);
         mOuterRingBackgroundColor = getColor(R.styleable.CustomCircleView_outerRingColor, typedArray, context, 0);
         mTextColor = getColor(R.styleable.CustomCircleView_outerRingColor, typedArray, context, R.attr.myColorText);
-
 
         mPercentDisplay = typedArray.getBoolean(R.styleable.CustomCircleView_percentDisplay, true);
         mTextDisplay = typedArray.getBoolean(R.styleable.CustomCircleView_textDisplay, false);
@@ -118,7 +118,7 @@ public class CustomCircleView extends View {
      * Get color from reference or color
      * index: styleable index, ex, R.styleable.yourAttr
      */
-    private int getColor(int index, TypedArray typedArray, Context context, int defaultAttrColor) {
+    private int getColor(@StyleableRes int index, TypedArray typedArray, Context context, @AttrRes int defaultAttrColor) {
         Resources.Theme theme = context.getTheme();
         Resources resources = context.getResources();
         int color = 0;
