@@ -15,11 +15,13 @@ public class MountPoint {
      * 用于标示，这段代码执行的时候这个出处卡是否处于挂载状态，如果是为true，否则反之
      */
     private boolean isMounted;
+    private String description;
 
-    public MountPoint(File file, boolean isRemovable, boolean isMounted) {
+    public MountPoint(File file, boolean isRemovable, boolean isMounted, String description) {
         this.file = file;
         this.isMounted = isMounted;
         this.isRemovable = isRemovable;
+        this.description = description;
     }
 
     public File getFile() {
@@ -34,11 +36,19 @@ public class MountPoint {
         return isMounted;
     }
 
-    public boolean isSDcard(){
-        return isMounted&&isRemovable;
+    public boolean isSDcard() {
+        return isMounted && isRemovable;
     }
 
-    public boolean isInternalMem(){
-        return isMounted&&(!isRemovable);
+    public boolean isInternalMem() {
+        return isMounted && (!isRemovable);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

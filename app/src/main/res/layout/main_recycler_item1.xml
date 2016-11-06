@@ -3,45 +3,60 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingBottom="15dp"
-    android:paddingLeft="15dp"
-    android:paddingRight="15dp"
-    android:paddingTop="15dp"
-    android:layout_margin="15dp"
-    android:gravity="center_vertical"
+    android:layout_marginBottom="@dimen/main_recycleItem_margin"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="15dp"
+    android:layout_marginTop="@dimen/main_recycleItem_margin"
     android:background="@drawable/item_selector"
-    >
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/main_recycleItem_padding">
 
     <fun.my.easyexplorer.ui.view.CustomCircleView
         android:id="@+id/customCircleView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        custom:outerRadius="35dp"
-        custom:ringWidth="3dp"
-        custom:textSize="15sp"
-        custom:shape="sector" />
+        custom:outerRadius="38dp"
+        custom:ringWidth="4dp"
+        custom:shape="ring"
+        custom:textSize="15sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_vertical">
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/deviceTextView"
+            android:id="@+id/titleTextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="0dp"
+            android:layout_weight="1.1"
+            android:textColor="?attr/myColorText"
+            android:gravity="center_vertical"
+            android:textSize="17sp"
+            />
 
         <TextView
             android:id="@+id/capacityTextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:textColor="?attr/myColorText"
+            android:gravity="center_vertical"/>
 
         <TextView
             android:id="@+id/pathTextView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:textColor="?attr/myColorText"
+            android:gravity="center_vertical"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="12sp" />
 
     </LinearLayout>
 </LinearLayout>

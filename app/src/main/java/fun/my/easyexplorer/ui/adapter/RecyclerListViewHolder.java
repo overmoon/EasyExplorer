@@ -25,4 +25,5 @@ public class RecyclerListViewHolder extends RecyclerView.ViewHolder {
         View childView = itemView.findViewById(id);
         sparseArray.put(id, childView);
     }
+
 }

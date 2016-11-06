@@ -2,15 +2,22 @@ package fun.my.easyexplorer.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import fun.my.easyexplorer.R;
+import fun.my.easyexplorer.model.AppInfo;
 
 /**
  * Created by admin on 2016/9/10.
@@ -30,6 +37,35 @@ public class Utils {
             put("其他", "*/*");
         }
     };
+
+
+    private List<AppInfo> getAppInfoList(Context context) {
+        String s;
+        String.format("%.2f", 3.14);
+        PackageManager pm = context.getPackageManager();
+        List appInfos = new ArrayList();
+        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
+        for (PackageInfo info : apps){
+            String packageName = info.packageName;
+            String appName = info.applicationInfo.loadLabel(pm).toString();
+            Drawable drawable = info.applicationInfo.loadIcon(pm);
+            AppInfo appInfo = new AppInfo(appName, packageName, drawable);
+            appInfos.add(appInfo);
+        }
+        return appInfos;
+    }
+
+    /**
+     * 获取小数点后 n 位精度
+     * */
+    public static double getNDegree(double num, int n){
+        BigDecimal bigDecimal = new BigDecimal(num);
+        return  bigDecimal.setScale(n, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public static double byteToGB(double size){
+        return size/1024/1024/1024;
+    }
 
     public static void messageShort(Context context, String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();

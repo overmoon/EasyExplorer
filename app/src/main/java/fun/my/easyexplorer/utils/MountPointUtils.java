@@ -53,6 +53,7 @@ public class MountPointUtils {
             Class class_StorageVolume = Class.forName("android.os.storage.StorageVolume");
             Method method_isRemovable = class_StorageVolume.getMethod("isRemovable");
             Method method_getPath = class_StorageVolume.getMethod("getPath");
+            Method method_getUserLabel = class_StorageVolume.getMethod("getUserLabel");
 //           if Build.VERSION.SDK_INT >= 17, StorageVolume has the Method getPathFile;
 //            if (Build.VERSION.SDK_INT >= 17) {
 //                // api17以下的版本在StorageVolume方法中没有getPathFile
@@ -70,13 +71,14 @@ public class MountPointUtils {
                 boolean isMounted;
                 //获取挂载状态。
                 String getVolumeState = (String) method_getVolumeState.invoke(sm, path);
-
                 if (getVolumeState.equals(Environment.MEDIA_MOUNTED)) {
                     isMounted = true;
                 } else {
                     isMounted = false;
                 }
-                result.add(new MountPoint(file, isRemovable, isMounted));
+                //获取description
+                String description = (String) method_getUserLabel.invoke(value);
+                result.add(new MountPoint(file, isRemovable, isMounted, description));
             }
             return result;
             //endregion

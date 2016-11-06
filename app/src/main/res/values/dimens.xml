@@ -2,4 +2,11 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <!-- circle button size and radius -->
+    <dimen name="circleButtonSize">60dp</dimen>
+    <dimen name="circleButtonSize_half">30dp</dimen>
+
+    <dimen name="main_recycleItem_margin">5dp</dimen>
+    <dimen name="main_recycleItem_padding">10dp</dimen>
+    <dimen name="shadowSize">2dp</dimen>
 </resources>
