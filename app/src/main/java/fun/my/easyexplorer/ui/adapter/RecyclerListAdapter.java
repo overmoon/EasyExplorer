@@ -10,25 +10,22 @@ import java.io.File;
 import java.util.List;
 
 import fun.my.easyexplorer.R;
+import fun.my.easyexplorer.model.Frame;
 
 /**
  * Created by admin on 2016/9/13.
  */
 public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListViewHolder> {
     private static int TEXT_VIEW_ID = R.id.recycler_textView;
-    private List<File> list;
+    private List<Frame> list;
     private OnItemClickListener onItemClickListener;
 
-    public interface OnItemClickListener{
-        void onItemClick(View view, int position);
+    public RecyclerListAdapter(List list) {
+        this.list = list;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){
         onItemClickListener = listener;
-    }
-
-    public RecyclerListAdapter( List list) {
-        this.list = list;
     }
 
     @Override
@@ -42,7 +39,7 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListViewHo
     @Override
     public void onBindViewHolder(final RecyclerListViewHolder holder, final int position) {
         TextView textView = holder.get(TEXT_VIEW_ID);
-        File f = list.get(position);
+        File f = list.get(position).getFile();
         String fileName = f.getName();
         if(fileName==null || fileName.trim().equals("")){
             fileName=f.getPath();
@@ -62,5 +59,9 @@ public class RecyclerListAdapter extends RecyclerView.Adapter<RecyclerListViewHo
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
     }
 }

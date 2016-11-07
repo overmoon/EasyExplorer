@@ -1,5 +1,6 @@
 package fun.my.easyexplorer.ui.adapter;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,6 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 
 import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
@@ -23,15 +23,17 @@ import fun.my.easyexplorer.utils.Utils;
  */
 
 public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListViewHolder> {
-    private final static int MOUNT_POINT = 0;
-    private final static int NORMAL_FILE = 1;
-    private final static int ADD_BUTTON = 2;
+    public final static int MOUNT_POINT = 0;
+    public final static int NORMAL_FILE = 1;
+    public final static int ADD_BUTTON = 2;
 
     private List objList;
     private CustomCircleView customCircleView;
-    private TextView titleTextView, capacityTextView, pathTextView;
+    private TextView titleTextView, capacityTextView, pathTextView, appTextView, packageTextView;
     private ImageView iconImageView;
     private Button addButton;
+    private OnItemClickedListener itemClickedListener;
+    private OnItemLongClickedListener itemLongClickedListener;
 
     public MainRecyclerListAdapter( List objList) {
         this.objList = objList;
@@ -52,8 +54,8 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             item = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_recycler_item2, parent, false);
             viewHolder = new RecyclerListViewHolder(item);
             viewHolder.set(R.id.iconImageView);
-            viewHolder.set(R.id.titleTextView);
-            viewHolder.set(R.id.pathTextView);
+            viewHolder.set(R.id.appTextView);
+            viewHolder.set(R.id.packageTextView);
         } else {
             item = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_recycler_item3, parent, false);
             viewHolder = new RecyclerListViewHolder(item);
@@ -64,7 +66,8 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     }
 
     @Override
-    public void onBindViewHolder(RecyclerListViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerListViewHolder holder, final int position) {
+        Object object = objList.get(position);
         int type = getItemViewType(position);
         if (type == MOUNT_POINT) {
             customCircleView = holder.get(R.id.customCircleView);
@@ -72,7 +75,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             capacityTextView = holder.get(R.id.capacityTextView);
             pathTextView = holder.get(R.id.pathTextView);
 
-            MountPoint mountPoint = (MountPoint) objList.get(position);
+            MountPoint mountPoint = (MountPoint) object;
             File f = mountPoint.getFile();
             titleTextView.setText(mountPoint.getDescription());
             long maxSize = f.getTotalSpace();
@@ -84,18 +87,44 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             pathTextView.setText(f.getAbsolutePath());
             double percent = Utils.getNDegree ((usedSizeGb / maxSizeGb), 2);
             customCircleView.setmPercent((float) percent);
+
+
         } else  if (type == NORMAL_FILE){
             iconImageView = holder.get(R.id.iconImageView);
-            titleTextView = holder.get(R.id.titleTextView);
-            pathTextView = holder.get(R.id.pathTextView);
+            appTextView = holder.get(R.id.appTextView);
+            packageTextView = holder.get(R.id.packageTextView);
 
-            iconImageView.setImageResource(R.mipmap.ic_launcher);
-            titleTextView.setText("");
-            pathTextView.setText("");
+            AppInfo appInfo = (AppInfo) object;
+            Drawable drawable = appInfo.getDrawable();
+            if (drawable == null) {
+                iconImageView.setImageResource(R.mipmap.ic_launcher);
+            } else {
+                iconImageView.setImageDrawable(drawable);
+            }
+            appTextView.setText(appInfo.getAppName());
+            packageTextView.setText(appInfo.getPackageName());
+
+
         } else {
             addButton = holder.get(R.id.addButton);
         }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                itemClickedListener.onItemClicked(v, position);
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                itemLongClickedListener.onItemLongClicked(v, position);
+                return true;
+            }
+        });
     }
+
 
     @Override
     public int getItemCount() {
@@ -114,5 +143,20 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         }
     }
 
+    public void setItemClickedListener(OnItemClickedListener itemClickedListener) {
+        this.itemClickedListener = itemClickedListener;
+    }
+
+    public void setItemLongClickedListener(OnItemLongClickedListener itemLongClickedListener) {
+        this.itemLongClickedListener = itemLongClickedListener;
+    }
+
+    public interface OnItemClickedListener {
+        void onItemClicked(View view, int positon);
+    }
+
+    public interface OnItemLongClickedListener {
+        void onItemLongClicked(View v, int position);
+    }
 
 }

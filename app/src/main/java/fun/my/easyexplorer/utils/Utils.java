@@ -1,12 +1,10 @@
 package fun.my.easyexplorer.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import java.io.File;
@@ -16,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 
 /**
@@ -26,84 +23,6 @@ public class Utils {
 
     public final static int SHORT = Toast.LENGTH_SHORT;
     public final static int LONG = Toast.LENGTH_LONG;
-
-    public static Map<String, String> type_map = new HashMap<String, String>() {
-        {
-            put("文本", "text/*");
-            put("视频", "video/*");
-            put("音频", "audio/*");
-            put("图片", "image/*");
-            put("应用", "application/vnd.android.package-archive");
-            put("其他", "*/*");
-        }
-    };
-
-
-    private List<AppInfo> getAppInfoList(Context context) {
-        String s;
-        String.format("%.2f", 3.14);
-        PackageManager pm = context.getPackageManager();
-        List appInfos = new ArrayList();
-        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
-        for (PackageInfo info : apps){
-            String packageName = info.packageName;
-            String appName = info.applicationInfo.loadLabel(pm).toString();
-            Drawable drawable = info.applicationInfo.loadIcon(pm);
-            AppInfo appInfo = new AppInfo(appName, packageName, drawable);
-            appInfos.add(appInfo);
-        }
-        return appInfos;
-    }
-
-    /**
-     * 获取小数点后 n 位精度
-     * */
-    public static double getNDegree(double num, int n){
-        BigDecimal bigDecimal = new BigDecimal(num);
-        return  bigDecimal.setScale(n, BigDecimal.ROUND_HALF_UP).doubleValue();
-    }
-
-    public static double byteToGB(double size){
-        return size/1024/1024/1024;
-    }
-
-    public static void messageShort(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-
-    }
-
-    public static void messageLong(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-        ;
-    }
-
-    public static void message(Context context, String msg, int duration) {
-        Toast.makeText(context, msg, duration).show();
-        ;
-    }
-
-    public static String getMimeType(File f) {
-        String fileName = f.getName();
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-        String mimeType = MIME_MapTable.get(extension);
-
-        return mimeType;
-    }
-
-    public static int getWindowWidth(Context context) {
-        DisplayMetrics dm = context.getResources().getDisplayMetrics();
-        return dm.widthPixels;
-    }
-
-    public static int getWindowHeight(Context context) {
-        DisplayMetrics dm = context.getResources().getDisplayMetrics();
-        return dm.heightPixels;
-    }
-
-    public static DisplayMetrics getWindowDisMetrics(Context context) {
-        return context.getResources().getDisplayMetrics();
-    }
-
     private static final HashMap<String, String> MIME_MapTable = new HashMap<String, String>() {
         //{后缀名，MIME类型}
         {
@@ -538,4 +457,92 @@ public class Utils {
             put("", "*/*");
         }
     };
+    public static Map<String, String> type_map = new HashMap<String, String>() {
+        {
+            put("文本", "text/*");
+            put("视频", "video/*");
+            put("音频", "audio/*");
+            put("图片", "image/*");
+            put("应用", "application/vnd.android.package-archive");
+            put("其他", "*/*");
+        }
+    };
+
+    public static List<AppInfo> getAppInfoList5(Context context) {
+        PackageManager pm = context.getPackageManager();
+        List appInfos = new ArrayList();
+        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
+        for (int i = 0; i < 5; i++) {
+            PackageInfo info = apps.get(i);
+            String packageName = info.packageName;
+            String appName = info.applicationInfo.loadLabel(pm).toString();
+            Drawable drawable = info.applicationInfo.loadIcon(pm);
+            AppInfo appInfo = new AppInfo(appName, packageName, drawable);
+            appInfos.add(appInfo);
+        }
+        return appInfos;
+    }
+
+    public static List<AppInfo> getAppInfoList(Context context) {
+        PackageManager pm = context.getPackageManager();
+        List appInfos = new ArrayList();
+        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
+        for (PackageInfo info : apps) {
+            String packageName = info.packageName;
+            String appName = info.applicationInfo.loadLabel(pm).toString();
+            Drawable drawable = info.applicationInfo.loadIcon(pm);
+            AppInfo appInfo = new AppInfo(appName, packageName, drawable);
+            appInfos.add(appInfo);
+        }
+        return appInfos;
+    }
+
+    /**
+     * 获取小数点后 n 位精度
+     */
+    public static double getNDegree(double num, int n) {
+        BigDecimal bigDecimal = new BigDecimal(num);
+        return bigDecimal.setScale(n, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public static double byteToGB(double size) {
+        return size / 1024 / 1024 / 1024;
+    }
+
+    public static void messageShort(Context context, String msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
+    }
+
+    public static void messageLong(Context context, String msg) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+        ;
+    }
+
+    public static void message(Context context, String msg, int duration) {
+        Toast.makeText(context, msg, duration).show();
+        ;
+    }
+
+    public static String getMimeType(File f) {
+        String fileName = f.getName();
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String mimeType = MIME_MapTable.get(extension);
+
+        return mimeType;
+    }
+
+    public static int getWindowWidth(Context context) {
+        DisplayMetrics dm = context.getResources().getDisplayMetrics();
+        return dm.widthPixels;
+    }
+
+    public static int getWindowHeight(Context context) {
+        DisplayMetrics dm = context.getResources().getDisplayMetrics();
+        return dm.heightPixels;
+    }
+
+    public static DisplayMetrics getWindowDisMetrics(Context context) {
+        return context.getResources().getDisplayMetrics();
+    }
 }

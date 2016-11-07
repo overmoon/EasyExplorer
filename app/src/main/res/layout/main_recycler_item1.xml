@@ -3,10 +3,10 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/main_recycleItem_margin"
-    android:layout_marginLeft="15dp"
-    android:layout_marginRight="15dp"
-    android:layout_marginTop="@dimen/main_recycleItem_margin"
+    android:layout_marginBottom="@dimen/main_recycleItem_margin_vertical"
+    android:layout_marginLeft="@dimen/main_recycleItem_margin_horizontal"
+    android:layout_marginRight="@dimen/main_recycleItem_margin_horizontal"
+    android:layout_marginTop="@dimen/main_recycleItem_margin_vertical"
     android:background="@drawable/item_selector"
     android:gravity="center_vertical"
     android:orientation="horizontal"
@@ -33,30 +33,30 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.1"
-            android:textColor="?attr/myColorText"
             android:gravity="center_vertical"
-            android:textSize="17sp"
+            android:textColor="?attr/myColorText"
+            android:textSize="@dimen/bigTextSize"
             />
 
         <TextView
             android:id="@+id/capacityTextView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
             android:layout_marginTop="5dp"
-            android:textColor="?attr/myColorText"
-            android:gravity="center_vertical"/>
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textColor="?attr/myColorText" />
 
         <TextView
             android:id="@+id/pathTextView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:textColor="?attr/myColorText"
-            android:gravity="center_vertical"
             android:ellipsize="end"
+            android:gravity="center_vertical"
             android:maxLines="1"
-            android:textSize="12sp" />
+            android:textColor="?attr/myColorText"
+            android:textSize="@dimen/smallTextSize" />
 
     </LinearLayout>
 </LinearLayout>

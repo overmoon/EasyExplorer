@@ -1,13 +1,10 @@
 package fun.my.easyexplorer.ui.activity;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,14 +23,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 
 import fun.my.easyexplorer.R;
-import fun.my.easyexplorer.model.MountPoint;
+import fun.my.easyexplorer.model.Frame;
 import fun.my.easyexplorer.ui.FileDividerItemDecoration;
 import fun.my.easyexplorer.ui.adapter.FileListAdapter;
 import fun.my.easyexplorer.ui.adapter.RecyclerListAdapter;
-import fun.my.easyexplorer.utils.MountPointUtils;
 import fun.my.easyexplorer.utils.Utils;
 
 /**
@@ -41,47 +36,38 @@ import fun.my.easyexplorer.utils.Utils;
  */
 public class FileExplorerActivity extends BaseActivity {
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
+    protected int scrollPosition, childTop;
     private ListView file_ListView;
     private RecyclerView recyclerView;
     private FileListAdapter fileListAdapter;
     private RecyclerListAdapter recyclerListAdapter;
-    private List<File> files;
+    //当前文件列表
     private List<File> currentFileList;
-    private List<MountPoint> mountPoints;
-    private File currentFile;
-    protected int scrollPosition, childTop;
-    private Stack<Point> scrollPosStack;
+    //打开文件顺序
+    private ArrayList<Frame> cacheList;
 
     @Override
     protected void initVariables() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            //申请READ_EXTERNAL_STORAGE权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    READ_EXTERNAL_STORAGE_REQUEST_CODE);
+        cacheList = new ArrayList();
+        String path = getIntent().getStringExtra("file");
+        File currentFile;
+        if (path != null || !path.equals("")) {
+            currentFile = new File(path);
+            cacheList.addAll(getParentsFiles(currentFile));
+        } else {
+            currentFile = new File(File.separator);
         }
-        MountPointUtils mountPointUtils = MountPointUtils.GetMountPointInstance(this);
+
+        cacheList.add(new Frame(currentFile, new Point()));
         currentFileList = new ArrayList<>();
-        mountPoints = mountPointUtils.getMountedPoint();
-        for (MountPoint p : mountPoints) {
-            currentFileList.add(p.getFile());
-        }
         scrollPosition = childTop = 0;
-        scrollPosStack = new Stack<>();
-        //file list
+        //file list adapter
         fileListAdapter = new FileListAdapter(FileExplorerActivity.this, currentFileList);
 
-        //guide view
-        currentFile = new File("/storage");
-        files = new ArrayList<>();
-        files.add(new File("/"));
-        files.add(currentFile);
-//        List parseList = parsePath(currentFile);
-//        if (parseList != null) {
-//            files.addAll(parseList);
-//        }
-        recyclerListAdapter = new RecyclerListAdapter(files);
+        //路径栏
+        recyclerListAdapter = new RecyclerListAdapter(cacheList);
     }
+
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
@@ -119,28 +105,39 @@ public class FileExplorerActivity extends BaseActivity {
         //添加分割线
         FileDividerItemDecoration itemDecoration = new FileDividerItemDecoration(this, LinearLayoutManager.HORIZONTAL, 25);
         recyclerView.addItemDecoration(itemDecoration);
+        //添加路径栏监听事件
         recyclerListAdapter.setOnItemClickListener(new RecyclerListAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                if (position != files.size() - 1) {
-                    Point p = null;
-                    for (int i = files.size() - 1; i > position; i--) {
-                        files.remove(i);
-                        if (scrollPosStack.empty())
-                            p = null;
-                        else
-                            p = scrollPosStack.pop();
-                    }
-                    refreshGuideView();
-                    refreshFileListView(files.get(position), p);
-                }
-            }
-        });
+                                                       @Override
+                                                       public void onItemClick(View view, int position) {
+                                                           int size = cacheList.size();
+                                                           for (int i = size - 1; i > position; i--) {
+                                                               cacheList.remove(i);
+                                                           }
+                                                           loadData();
+                                                       }
+                                                   }
+
+        );
     }
 
     @Override
     protected void loadData() {
+        int size = cacheList.size();
+        //加载路径栏
+        loadPathView(cacheList);
+        //加载file list
+        loadFileListView(cacheList.get(size - 1));
 
+    }
+
+    //获取父文件列表
+    private ArrayList<Frame> getParentsFiles(File currentFile) {
+        ArrayList<Frame> list = new ArrayList();
+        File f = currentFile;
+        while ((f = f.getParentFile()) != null) {
+            list.add(0, new Frame(f, new Point()));
+        }
+        return list;
     }
 
     private void listOnScrollChanged(AbsListView view, int scrollState) {
@@ -207,14 +204,16 @@ public class FileExplorerActivity extends BaseActivity {
 
         alertDialog.show();
         WindowManager.LayoutParams lp = alertDialog.getWindow().getAttributes();
-        lp.width= (int) (Utils.getWindowWidth(this)*0.9);
+        lp.width = (int) (Utils.getWindowWidth(this) * 0.9);
         alertDialog.getWindow().setAttributes(lp);
     }
 
     private void openDir(File f) {
-        scrollPosStack.add(new Point(scrollPosition, childTop));
-        addGuideView(f);
-        refreshFileListView(f, null);
+        //缓存列表位置
+        cacheList.get(cacheList.size() - 1).getPoint().set(scrollPosition, childTop);
+        //添加文件
+        cacheList.add(new Frame(f, new Point()));
+        loadData();
     }
 
     private List<String> parsePath(File file) {
@@ -228,31 +227,25 @@ public class FileExplorerActivity extends BaseActivity {
         }
     }
 
-    private void addGuideView(File f) {
-        files.add(f);
-        refreshGuideView();
-    }
-
-    private void removeGuideView() {
-        files.remove(files.size() - 1);
-        refreshGuideView();
-    }
-
-    private void refreshGuideView() {
+    private void loadPathView(List list) {
         recyclerListAdapter.notifyDataSetChanged();
-        recyclerView.smoothScrollToPosition(files.size() - 1);
+        recyclerView.smoothScrollToPosition(list.size() - 1);
     }
 
-    public void refreshFileListView(File f, Point p) {
-        currentFile = f;
+    public void loadFileListView(Frame frame) {
+        File currentFile = frame.getFile();
+        Point p = frame.getPoint();
         currentFileList.clear();
-        currentFileList.addAll(Arrays.asList(f.listFiles()));
+        File[] files = currentFile.listFiles();
+        if (files != null) {
+            currentFileList.addAll(Arrays.asList(files));
+        }
         fileListAdapter.notifyDataSetChanged();
 
         if (p == null) {
             scrollPosition = 0;
             childTop = 0;
-        }else{
+        } else {
             scrollPosition = p.x;
             childTop = p.y;
         }
@@ -261,15 +254,12 @@ public class FileExplorerActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if (currentFile == null || currentFile.getParentFile() == null) {
+        int size = cacheList.size();
+        if (size == 0) {
             super.onBackPressed();
         } else {
-            Point p = null;
-            if (!scrollPosStack.empty()) {
-                p = scrollPosStack.pop();
-            }
-            removeGuideView();
-            refreshFileListView(currentFile.getParentFile(), p);
+            cacheList.remove(cacheList.size() - 1);
+            loadData();
         }
     }
 

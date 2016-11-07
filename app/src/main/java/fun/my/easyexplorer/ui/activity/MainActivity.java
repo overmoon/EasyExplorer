@@ -3,16 +3,14 @@ package fun.my.easyexplorer.ui.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageInfo;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +19,14 @@ import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.ui.adapter.MainRecyclerListAdapter;
-import fun.my.easyexplorer.ui.view.CustomCircleView;
 import fun.my.easyexplorer.utils.MountPointUtils;
+import fun.my.easyexplorer.utils.Utils;
 
 public class MainActivity extends Activity {
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
     private List adapterDataList;
     private List<MountPoint> mountPoints;
+    private List<AppInfo> appInfos;
     private MainRecyclerListAdapter adapter;
     private RecyclerView recyclerView;
 
@@ -48,7 +47,21 @@ public class MainActivity extends Activity {
         }
         adapterDataList = new ArrayList();
         adapter = new MainRecyclerListAdapter(adapterDataList);
+        //设置单击事件
+        adapter.setItemClickedListener(new MainRecyclerListAdapter.OnItemClickedListener() {
+            @Override
+            public void onItemClicked(View view, int positon) {
+                Object object = adapterDataList.get(positon);
+                if (adapter.getItemViewType(positon) == MainRecyclerListAdapter.MOUNT_POINT) {
+                    MountPoint mountPoint = (MountPoint) object;
+                    Intent intent = new Intent(MainActivity.this, FileExplorerActivity.class);
+                    intent.putExtra("file", mountPoint.getFile().getAbsolutePath());
+                    startActivity(intent);
+                }
+            }
+        });
 
+        appInfos = Utils.getAppInfoList5(this);
     }
 
     protected void initViews(Bundle savedInstanceState) {
@@ -60,7 +73,9 @@ public class MainActivity extends Activity {
     }
 
     protected void loadData() {
+        adapterDataList.clear();
         adapterDataList.addAll(getMountedPoints(this));
+        adapterDataList.addAll(appInfos);
         adapterDataList.add(new Object());
         adapter.notifyDataSetChanged();
     }

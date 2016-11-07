@@ -9,7 +9,7 @@
         android:id="@+id/addButton"
         android:layout_width="@dimen/circleButtonSize"
         android:layout_height="@dimen/circleButtonSize"
-        android:layout_margin="@dimen/main_recycleItem_margin"
+        android:layout_margin="@dimen/main_recycleItem_margin_vertical"
         android:background="@drawable/circle_button_selector"
         android:text="+"
         android:textSize="20sp" />
