@@ -49,9 +49,9 @@ public class FileExplorerActivity extends BaseActivity {
     @Override
     protected void initVariables() {
         cacheList = new ArrayList();
-        String path = getIntent().getStringExtra("file");
+        String path = getIntent().getStringExtra("path");
         File currentFile;
-        if (path != null || !path.equals("")) {
+        if (path != null && !path.equals("")) {
             currentFile = new File(path);
             cacheList.addAll(getParentsFiles(currentFile));
         } else {

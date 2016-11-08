@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import fun.my.easyexplorer.model.AppInfo;
+import fun.my.easyexplorer.model.ValuePair;
 
 /**
  * Created by admin on 2016/9/10.
@@ -470,7 +471,7 @@ public class Utils {
 
     public static List<AppInfo> getAppInfoList5(Context context) {
         PackageManager pm = context.getPackageManager();
-        List appInfos = new ArrayList();
+        List<AppInfo> appInfos = new ArrayList();
         List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
         for (int i = 0; i < 5; i++) {
             PackageInfo info = apps.get(i);
@@ -478,8 +479,12 @@ public class Utils {
             String appName = info.applicationInfo.loadLabel(pm).toString();
             Drawable drawable = info.applicationInfo.loadIcon(pm);
             AppInfo appInfo = new AppInfo(appName, packageName, drawable);
+            ArrayList arrayList = new ArrayList();
+            arrayList.add(new ValuePair<String, String>("tag", "easypath"));
+            appInfo.setValuePairList(arrayList);
             appInfos.add(appInfo);
         }
+        appInfos.get(2).getValuePairList().add(new ValuePair<String, String>("tag1", "/storage"));
         return appInfos;
     }
 

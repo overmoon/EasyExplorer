@@ -11,6 +11,7 @@
     <dimen name="shadowSize">2dp</dimen>
     <dimen name="imageViewSize">35dp</dimen>
     <dimen name="main_recycleItem_margin_horizontal">15dp</dimen>
-    <dimen name="smallTextSize">12sp</dimen>
+    <dimen name="smallTextSize">11sp</dimen>
     <dimen name="bigTextSize">17sp</dimen>
+    <dimen name="midTextSize">15sp</dimen>
 </resources>

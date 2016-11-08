@@ -2,7 +2,7 @@ package fun.my.easyexplorer.model;
 
 import android.graphics.drawable.Drawable;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * Created by admin on 2016/11/6.
@@ -13,7 +13,7 @@ public class AppInfo {
     private String appName;
     private Drawable drawable;
     private String packageName;
-    private HashMap<String, String> easyPathMap;
+    private ArrayList<ValuePair> valuePairList;
 
     public AppInfo(String appName, String packageName) {
         this(appName, packageName, null);
@@ -49,11 +49,13 @@ public class AppInfo {
         this.packageName = packageName;
     }
 
-    public HashMap<String, String> getEasyPathMap() {
-        return easyPathMap;
+    public ArrayList<ValuePair> getValuePairList() {
+        return valuePairList;
     }
 
-    public void setEasyPathMap(HashMap<String, String> easyPathMap) {
-        this.easyPathMap = easyPathMap;
+    public void setValuePairList(ArrayList<ValuePair> valuePairList) {
+        this.valuePairList = valuePairList;
     }
+
+
 }
