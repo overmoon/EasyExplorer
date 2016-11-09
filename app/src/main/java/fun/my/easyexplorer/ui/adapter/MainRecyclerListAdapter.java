@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
-import android.util.TypedValue;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,7 +48,11 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     private OnItemClickedListener itemClickedListener;
     private OnItemLongClickedListener itemLongClickedListener;
 
-    private TypedValue typedValue;
+    private AlertDialog dialog;
+    private ListPopupWindow listPopupWindow;
+    private List<AppInfo> appInfos;
+    private ListPopupAdapter popupAdapter;
+    private EditText appName_editText;
 
     public MainRecyclerListAdapter(List objList) {
         this.objList = objList;
@@ -224,11 +231,67 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     }
 
     private void showAddDialog(Context context) {
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.easypath_add_dialog, null);
+        initViews(context);
+//        dialog.show();
+        listPopupWindow.show();
+    }
 
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder((context));
-        dialogBuilder.setView(dialogView);
-        dialogBuilder.create().show();
+    private void initViews(Context context) {
+        LayoutInflater inflator = LayoutInflater.from(context);
+        initDialog(context);
+        initListPopupView(inflator);
+    }
+
+    //初始化popupwindow
+    private void initListPopupView(LayoutInflater inflator) {
+        //init listpopup view
+        listPopupWindow = new ListPopupWindow(context);
+        //get app infos
+        appInfos = Utils.getAppInfoList(context);
+        // init adapter
+        popupAdapter = new ListPopupAdapter(context, appInfos);
+        listPopupWindow.setAdapter(popupAdapter);
+        listPopupWindow.setWidth(500);
+        listPopupWindow.setHeight(600);
+        listPopupWindow.setAnchorView(addButton);
+    }
+
+    //初始化dialog
+    private void initDialog(Context context) {
+        if (dialog == null) {
+            //init dialog view
+            View view = LayoutInflater.from(context).inflate(R.layout.easypath_add_dialog, null);
+            ImageView imageView = (ImageView) view.findViewById(R.id.appIcon_dialog_imageView);
+            appName_editText = (EditText) view.findViewById(R.id.appName_dialog_editTextView);
+            EditText editText2 = (EditText) view.findViewById(R.id.tag_dialog_editTextView);
+            EditText editText3 = (EditText) view.findViewById(R.id.path_dialog_editTextView);
+            imageView.setImageResource(R.mipmap.ic_launcher);
+            TextWatcher textWatcher = new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    popupAdapter.getFilter().filter(s);
+                    if (!listPopupWindow.isShowing()) {
+                        listPopupWindow.show();
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+
+            };
+            appName_editText.addTextChangedListener(textWatcher);
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder((context));
+            dialogBuilder.setView(view);
+            dialog = dialogBuilder.create();
+        }
     }
 
     public interface OnItemClickedListener {
