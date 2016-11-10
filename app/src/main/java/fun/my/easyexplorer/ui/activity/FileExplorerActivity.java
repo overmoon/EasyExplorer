@@ -35,6 +35,7 @@ import fun.my.easyexplorer.utils.Utils;
  * Created by admin on 2016/9/10.
  */
 public class FileExplorerActivity extends BaseActivity {
+
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
     protected int scrollPosition, childTop;
     private ListView file_ListView;
@@ -45,11 +46,13 @@ public class FileExplorerActivity extends BaseActivity {
     private List<File> currentFileList;
     //打开文件顺序
     private ArrayList<Frame> cacheList;
+    private boolean isDir;
 
     @Override
     protected void initVariables() {
         cacheList = new ArrayList();
         String path = getIntent().getStringExtra("path");
+        isDir = getIntent().getBooleanExtra("isDir", false);
         File currentFile;
         if (path != null && !path.equals("")) {
             currentFile = new File(path);
@@ -67,7 +70,6 @@ public class FileExplorerActivity extends BaseActivity {
         //路径栏
         recyclerListAdapter = new RecyclerListAdapter(cacheList);
     }
-
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
@@ -140,6 +142,7 @@ public class FileExplorerActivity extends BaseActivity {
         return list;
     }
 
+    //判断滚动条状态
     private void listOnScrollChanged(AbsListView view, int scrollState) {
         //if the scroll is stop
         if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
@@ -238,7 +241,11 @@ public class FileExplorerActivity extends BaseActivity {
         currentFileList.clear();
         File[] files = currentFile.listFiles();
         if (files != null) {
-            currentFileList.addAll(Arrays.asList(files));
+            if (isDir) {
+                currentFileList.addAll(getDirFiles(files));
+            } else {
+                currentFileList.addAll(Arrays.asList(files));
+            }
         }
         fileListAdapter.notifyDataSetChanged();
 
@@ -250,6 +257,16 @@ public class FileExplorerActivity extends BaseActivity {
             childTop = p.y;
         }
         file_ListView.setSelectionFromTop(scrollPosition, childTop);
+    }
+
+    private ArrayList<File> getDirFiles(File[] files) {
+        ArrayList<File> dirFileList = new ArrayList<>();
+        for (File f : files) {
+            if (f.isDirectory()) {
+                dirFileList.add(f);
+            }
+        }
+        return dirFileList;
     }
 
     @Override
@@ -278,6 +295,5 @@ public class FileExplorerActivity extends BaseActivity {
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
-
 
 }

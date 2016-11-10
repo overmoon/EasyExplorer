@@ -11,8 +11,10 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -52,7 +54,9 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     private ListPopupWindow listPopupWindow;
     private List<AppInfo> appInfos;
     private ListPopupAdapter popupAdapter;
-    private EditText appName_editText;
+    private EditText appName_editText, tag_dialog_editTextView, path_dialog_editTextView;
+    private ImageView dialog_imageView;
+    private View dialog_divider1;
 
     public MainRecyclerListAdapter(List objList) {
         this.objList = objList;
@@ -174,7 +178,6 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Utils.messageShort(context, "clicked ~~");
                     showAddDialog(context);
                 }
             });
@@ -232,8 +235,8 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
     private void showAddDialog(Context context) {
         initViews(context);
-//        dialog.show();
-        listPopupWindow.show();
+        dialog.show();
+//        listPopupWindow.show();
     }
 
     private void initViews(Context context) {
@@ -248,24 +251,42 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         listPopupWindow = new ListPopupWindow(context);
         //get app infos
         appInfos = Utils.getAppInfoList(context);
-        // init adapter
+        //init adapter
         popupAdapter = new ListPopupAdapter(context, appInfos);
+
         listPopupWindow.setAdapter(popupAdapter);
-        listPopupWindow.setWidth(500);
-        listPopupWindow.setHeight(600);
-        listPopupWindow.setAnchorView(addButton);
+        listPopupWindow.setHeight(400);
+        listPopupWindow.setAnchorView(dialog_divider1);
+        listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                AppInfo appInfo = (AppInfo) parent.getItemAtPosition(position);
+                Object object = dialog_imageView.getTag();
+                int i = object == null ? 0 : (int) object;
+                if (i == R.mipmap.ic_launcher) {
+                    dialog_imageView.setImageDrawable(appInfo.getDrawable());
+                }
+                //标记被点击
+                appName_editText.setTag(true);
+                appName_editText.setText(appInfo.getAppName());
+                listPopupWindow.dismiss();
+            }
+        });
     }
 
     //初始化dialog
-    private void initDialog(Context context) {
+    private void initDialog(final Context context) {
         if (dialog == null) {
             //init dialog view
             View view = LayoutInflater.from(context).inflate(R.layout.easypath_add_dialog, null);
-            ImageView imageView = (ImageView) view.findViewById(R.id.appIcon_dialog_imageView);
+            dialog_imageView = (ImageView) view.findViewById(R.id.appIcon_dialog_imageView);
             appName_editText = (EditText) view.findViewById(R.id.appName_dialog_editTextView);
-            EditText editText2 = (EditText) view.findViewById(R.id.tag_dialog_editTextView);
-            EditText editText3 = (EditText) view.findViewById(R.id.path_dialog_editTextView);
-            imageView.setImageResource(R.mipmap.ic_launcher);
+            tag_dialog_editTextView = (EditText) view.findViewById(R.id.tag_dialog_editTextView);
+            path_dialog_editTextView = (EditText) view.findViewById(R.id.path_dialog_editTextView);
+            dialog_divider1 = view.findViewById(R.id.dialog_divider1);
+
+            dialog_imageView.setImageResource(R.mipmap.ic_launcher);
+            dialog_imageView.setTag(R.mipmap.ic_launcher);
             TextWatcher textWatcher = new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -274,10 +295,25 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    popupAdapter.getFilter().filter(s);
-                    if (!listPopupWindow.isShowing()) {
-                        listPopupWindow.show();
+                    Object object = appName_editText.getTag();
+                    boolean bool = object != null && (boolean) object;
+                    //判断是否被点击
+                    if (bool) {
+                        appName_editText.setTag(false);
+                        return;
                     }
+                    popupAdapter.getFilter().filter(s, new Filter.FilterListener() {
+                        @Override
+                        public void onFilterComplete(int count) {
+                            //if adapter data not empty and popup window not shown
+                            if (count == 0 && listPopupWindow.isShowing()) {
+                                listPopupWindow.dismiss();
+                            }
+                            if (count != 0 && !listPopupWindow.isShowing()) {
+                                listPopupWindow.show();
+                            }
+                        }
+                    });
                 }
 
                 @Override
@@ -287,7 +323,14 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
             };
             appName_editText.addTextChangedListener(textWatcher);
-
+            path_dialog_editTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+//                        ((Activity)context).startActivityForResult();
+                    }
+                }
+            });
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder((context));
             dialogBuilder.setView(view);
             dialog = dialogBuilder.create();
@@ -300,6 +343,5 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
     public interface OnItemLongClickedListener {
         void onItemLongClicked(View v, int position);
-
     }
 }

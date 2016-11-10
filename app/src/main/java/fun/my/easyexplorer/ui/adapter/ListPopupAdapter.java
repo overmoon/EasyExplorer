@@ -54,7 +54,7 @@ public class ListPopupAdapter extends BaseAdapter implements Filterable {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.listpop_item, parent, false);
         }
-        ImageView imageView = ListViewHolder.get(convertView, R.id.popup_textView);
+        ImageView imageView = ListViewHolder.get(convertView, R.id.popup_imageView);
         TextView textView = ListViewHolder.get(convertView, R.id.popup_textView);
 
         AppInfo info = appInfos.get(position);
@@ -72,18 +72,22 @@ public class ListPopupAdapter extends BaseAdapter implements Filterable {
         return appFilter;
     }
 
+    public void setFilter(AppFilter filter) {
+        this.appFilter = filter;
+    }
+
     class AppFilter extends Filter {
 
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults results = new FilterResults();
             if (constraint == null) {
-                results.values = appInfos;
+                results.values = originalInfos;
                 results.count = getCount();
             } else {
                 ArrayList tmpList = new ArrayList();
                 for (AppInfo appInfo : originalInfos) {
-                    if (appInfo.getAppName().contains(constraint)) {
+                    if (appInfo.getAppName().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         tmpList.add(appInfo);
                     }
                 }
@@ -95,8 +99,7 @@ public class ListPopupAdapter extends BaseAdapter implements Filterable {
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            appInfos.clear();
-            appInfos.addAll((List<AppInfo>) results.values);
+            appInfos = (List<AppInfo>) results.values;
             notifyDataSetChanged();
         }
     }

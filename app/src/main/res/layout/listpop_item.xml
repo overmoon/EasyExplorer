@@ -6,13 +6,16 @@
 
     <ImageView
         android:id="@+id/popup_imageView"
-        android:layout_width="25dp"
-        android:layout_height="25dp" />
+        android:layout_width="@dimen/popup_imageSize"
+        android:layout_height="@dimen/popup_imageSize"
+        android:layout_margin="5dp" />
 
     <TextView
         android:id="@+id/popup_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:ellipsize="marquee"
+        android:maxLines="1" />
 
 </LinearLayout>

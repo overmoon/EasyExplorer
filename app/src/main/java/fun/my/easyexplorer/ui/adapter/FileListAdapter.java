@@ -1,9 +1,7 @@
 package fun.my.easyexplorer.ui.adapter;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,8 +132,8 @@ public class FileListAdapter extends BaseAdapter {
         this.layout_ID = layout_ID;
     }
 
-    public static class FileViewHolder {
-        public TextView fileName_TextView;
-        public ImageView fileIcon_ImageView;
+    private class FileViewHolder {
+        TextView fileName_TextView;
+        ImageView fileIcon_ImageView;
     }
 }

@@ -14,4 +14,7 @@
     <dimen name="smallTextSize">11sp</dimen>
     <dimen name="bigTextSize">17sp</dimen>
     <dimen name="midTextSize">15sp</dimen>
+    <dimen name="popup_imageSize">25dp</dimen>
+    <dimen name="dialog_heightSize">40dp</dimen>
+    <dimen name="line_height">1dp</dimen>
 </resources>
