@@ -1,5 +1,6 @@
 package fun.my.easyexplorer.ui.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -27,6 +28,7 @@ import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.model.ValuePair;
+import fun.my.easyexplorer.ui.activity.DialogActivity;
 import fun.my.easyexplorer.ui.activity.FileExplorerActivity;
 import fun.my.easyexplorer.ui.view.CustomCircleView;
 import fun.my.easyexplorer.utils.Utils;
@@ -121,7 +123,6 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             double percent = Utils.getNDegree((usedSizeGb / maxSizeGb), 2);
             customCircleView.setmPercent((float) percent);
 
-
         } else if (type == NORMAL_FILE) {
             iconImageView = holder.get(R.id.iconImageView);
             appTextView = holder.get(R.id.appTextView);
@@ -142,6 +143,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
             ArrayList<ValuePair> list = appInfo.getValuePairList();
             int size = list.size();
+            //动态添加子view
             for (int i = 0; i < size; i++) {
                 ValuePair valuePair = list.get(i);
                 View v = list_item2_linearLayout.getChildAt(i);
@@ -188,7 +190,9 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                                            {
                                                @Override
                                                public void onClick(View v) {
-                                                   itemClickedListener.onItemClicked(v, position);
+                                                   if (itemClickedListener != null) {
+                                                       itemClickedListener.onItemClicked(v, position);
+                                                   }
                                                }
                                            }
 
@@ -199,7 +203,9 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                                                {
                                                    @Override
                                                    public boolean onLongClick(View v) {
-                                                       itemLongClickedListener.onItemLongClicked(v, position);
+                                                       if (itemLongClickedListener != null) {
+                                                           itemLongClickedListener.onItemLongClicked(v, position);
+                                                       }
                                                        return true;
                                                    }
                                                }
@@ -234,8 +240,10 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     }
 
     private void showAddDialog(Context context) {
-        initViews(context);
-        dialog.show();
+        Intent intent = new Intent(context, DialogActivity.class);
+        ((Activity) context).startActivity(intent);
+//        initViews(context);
+//        dialog.show();
 //        listPopupWindow.show();
     }
 
@@ -249,10 +257,9 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     private void initListPopupView(LayoutInflater inflator) {
         //init listpopup view
         listPopupWindow = new ListPopupWindow(context);
-        //get app infos
-        appInfos = Utils.getAppInfoList(context);
+
         //init adapter
-        popupAdapter = new ListPopupAdapter(context, appInfos);
+        popupAdapter = new ListPopupAdapter(context);
 
         listPopupWindow.setAdapter(popupAdapter);
         listPopupWindow.setHeight(400);

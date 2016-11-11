@@ -19,6 +19,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.FileExplorerActivity" />
+        <activity
+            android:name=".ui.activity.DialogActivity"
+            android:theme="@style/Base.Theme.AppCompat.Dialog" />
     </application>
 
 </manifest>
