@@ -10,6 +10,7 @@
     <dimen name="main_recycleItem_padding">10dp</dimen>
     <dimen name="shadowSize">2dp</dimen>
     <dimen name="imageViewSize">35dp</dimen>
+    <dimen name="imageViewSize_mid">30dp</dimen>
     <dimen name="main_recycleItem_margin_horizontal">15dp</dimen>
     <dimen name="smallTextSize">11sp</dimen>
     <dimen name="bigTextSize">17sp</dimen>

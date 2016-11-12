@@ -29,13 +29,32 @@
         android:layout_toRightOf="@+id/appIcon_dialog_imageView"
         android:orientation="vertical">
 
-        <AutoCompleteTextView
-            android:id="@+id/appName_dialog_editTextView"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:maxLength="100"
-            android:padding="@dimen/main_recycleItem_padding" />
+            android:orientation="horizontal">
+
+            <AutoCompleteTextView
+                android:id="@+id/appName_dialog_editTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:maxLength="100"
+                android:paddingBottom="@dimen/main_recycleItem_padding"
+                android:paddingLeft="@dimen/main_recycleItem_padding"
+                android:paddingTop="@dimen/main_recycleItem_padding" />
+
+            <ImageView
+                android:id="@+id/popItem_dialog_imageView"
+                android:layout_width="@dimen/imageViewSize_mid"
+                android:layout_height="@dimen/imageViewSize_mid"
+                android:layout_gravity="top"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/popdown_selector"
+                android:clickable="true" />
+
+        </LinearLayout>
 
         <View
             android:id="@+id/dialog_divider1"
@@ -57,15 +76,33 @@
             android:layout_height="@dimen/line_height"
             android:background="@drawable/edittext_boarder" />
 
-        <EditText
-            android:id="@+id/path_dialog_editTextView"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+            android:id="@+id/path_dialog_editTextView"
+                android:layout_width="0dp"
+            android:layout_height="wrap_content"
+                android:layout_weight="1"
             android:background="@null"
             android:hint="@string/add_dialog_path_hint"
             android:maxLength="100"
-            android:padding="@dimen/main_recycleItem_padding" />
+                android:paddingBottom="@dimen/main_recycleItem_padding"
+                android:paddingLeft="@dimen/main_recycleItem_padding"
+                android:paddingTop="@dimen/main_recycleItem_padding" />
 
+            <ImageView
+                android:id="@+id/path_dialog_imageView"
+                android:layout_width="@dimen/imageViewSize_mid"
+                android:layout_height="@dimen/imageViewSize_mid"
+                android:layout_gravity="top"
+                android:layout_marginTop="10dp"
+                android:background="@mipmap/openfolder"
+                android:clickable="true" />
+
+        </LinearLayout>
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_height"
