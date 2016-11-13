@@ -2,6 +2,8 @@ package fun.my.easyexplorer.model;
 
 import android.graphics.drawable.Drawable;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.ArrayList;
 
 /**
@@ -9,11 +11,15 @@ import java.util.ArrayList;
  */
 
 public class AppInfo {
-
+    @Expose
     private String appName;
-    private Drawable drawable;
+    @Expose
+    private String drawableFile;
+    @Expose
     private String packageName;
+    @Expose
     private ArrayList<ValuePair> valuePairList;
+    private Drawable drawable;
 
     public AppInfo(String appName, String packageName) {
         this(appName, packageName, null);
@@ -23,6 +29,17 @@ public class AppInfo {
         this.appName = appName;
         this.packageName = packageName;
         this.drawable = drawable;
+    }
+
+    public AppInfo(String appName, String drawableFile, String packageName, ArrayList<ValuePair> valuePairList) {
+        this.appName = appName;
+        this.drawableFile = drawableFile;
+        this.packageName = packageName;
+        this.valuePairList = valuePairList;
+    }
+
+    public AppInfo() {
+
     }
 
     public String getAppName() {
@@ -57,5 +74,38 @@ public class AppInfo {
         this.valuePairList = valuePairList;
     }
 
+    public String getDrawableFile() {
+        return drawableFile;
+    }
 
+    public void setDrawableFile(String drawableFile) {
+        this.drawableFile = drawableFile;
+    }
+
+//    public AppInfo(Context context, AppInfoBean bean) {
+//        this.appName = bean.getAppName();
+//        this.packageName = bean.getPackageName();
+//        this.valuePairList = bean.getValuePairList();
+//
+//        String drawableString = bean.getDrawable();
+//        if (drawableString != null || !drawableString.equals("") || !drawableString.equals("null")) {
+//            drawable = Utils.getDrawableFromFile(drawableString);
+//        } else if (!TextUtils.isEmpty("packageName")) {
+//            drawable = Utils.getAppDrawableIcon(context, packageName);
+//        }
+//
+//    }
+//
+//    public static List<AppInfo> fromAppInfoBeans(Context context, List<AppInfoBean> appInfoBeans){
+//        List<AppInfo> appInfos = new ArrayList<>();
+//        for (AppInfoBean bean:appInfoBeans){
+//            appInfos.add(new AppInfo(context, bean));
+//        }
+//
+//        return appInfos;
+//    }
+//
+//    public static AppInfoBean toAppInfoBean(){
+//
+//    }
 }

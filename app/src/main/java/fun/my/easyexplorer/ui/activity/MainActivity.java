@@ -52,7 +52,9 @@ public class MainActivity extends BaseActivity {
         });
 
         appInfos = Utils.getAppInfoList5(this);
-
+//        Gson gson = new Gson();
+//        String json = gson.toJson(appInfos.get(0));
+//        System.out.println(json);
     }
 
     protected void initViews(Bundle savedInstanceState) {

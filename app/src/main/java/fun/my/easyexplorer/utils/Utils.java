@@ -3,6 +3,8 @@ package fun.my.easyexplorer.utils;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
@@ -16,6 +18,7 @@ import java.util.Map;
 
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.ValuePair;
+import my.fun.asyncload.imageloader.utils.BitmapUtils;
 
 /**
  * Created by admin on 2016/9/10.
@@ -488,6 +491,16 @@ public class Utils {
         return appInfos;
     }
 
+    public static Drawable getAppDrawableIcon(Context context, String packageName) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            return pm.getApplicationIcon(packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            messageShort(context, "packageName not found: " + packageName);
+        }
+        return null;
+    }
+
     public static List<AppInfo> getAppInfoList(Context context) {
         PackageManager pm = context.getPackageManager();
         List appInfos = new ArrayList();
@@ -550,4 +563,13 @@ public class Utils {
     public static DisplayMetrics getWindowDisMetrics(Context context) {
         return context.getResources().getDisplayMetrics();
     }
+
+    public static Bitmap getBitmapFromFile(Context context, String file) {
+        return BitmapUtils.decodeSampleBitmapFromResource(file, 0, 0);
+    }
+
+    public static Drawable getDrawableFromFile(String file) {
+        return BitmapDrawable.createFromPath(file);
+    }
+
 }

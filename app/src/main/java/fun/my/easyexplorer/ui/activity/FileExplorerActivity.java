@@ -16,6 +16,8 @@ import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -37,6 +39,7 @@ import fun.my.easyexplorer.utils.Utils;
 public class FileExplorerActivity extends BaseActivity {
 
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
+
     protected int scrollPosition, childTop;
     private ListView file_ListView;
     private RecyclerView recyclerView;
@@ -47,6 +50,7 @@ public class FileExplorerActivity extends BaseActivity {
     //打开文件顺序
     private ArrayList<Frame> cacheList;
     private boolean isDir;
+    private LinearLayout buttonLayout;
 
     @Override
     protected void initVariables() {
@@ -74,7 +78,34 @@ public class FileExplorerActivity extends BaseActivity {
     @Override
     protected void initViews(Bundle savedInstanceState) {
         setContentView(R.layout.activity_fileexplorer);
-
+        //底部按钮栏
+        buttonLayout = (LinearLayout) findViewById(R.id.buttonLinearLayout);
+        //判断是否显示按钮栏
+        if (isDir) {
+            buttonLayout.setVisibility(View.VISIBLE);
+        }
+        //取消按钮
+        Button cancelButton = (Button) findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+        //确认按钮
+        Button confirmButton = (Button) findViewById(R.id.confirm_button);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                //获取当前路径
+                String path = cacheList.get(cacheList.size() - 1).getFile().getAbsolutePath();
+                intent.putExtra("path", path);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
         //filelist init
         file_ListView = (ListView) findViewById(R.id.file_listView);
         file_ListView.setAdapter(fileListAdapter);
