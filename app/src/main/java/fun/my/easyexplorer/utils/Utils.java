@@ -3,10 +3,16 @@ package fun.my.easyexplorer.utils;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.AttrRes;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import java.io.File;
@@ -570,6 +576,40 @@ public class Utils {
 
     public static Drawable getDrawableFromFile(String file) {
         return BitmapDrawable.createFromPath(file);
+    }
+
+    public static int getThemeAttrColor(Context context, @AttrRes int colorAttr) {
+        Resources.Theme theme = context.getTheme();
+        Resources resources = context.getResources();
+        int color = 0;
+        TypedArray typedArray = theme.obtainStyledAttributes(new int[]{colorAttr});
+        try {
+            TypedValue value = new TypedValue();
+            typedArray.getValue(0, value);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                color = resources.getColor(value.resourceId, theme);
+            } else {
+                color = resources.getColor(value.resourceId);
+            }
+            ColorStateList stateList = null;//typedArray.getColorStateList(resources.gecolorAttr);
+
+            if (stateList == null) {
+
+
+                TypedValue typedValue = new TypedValue();
+                theme.resolveAttribute(colorAttr, typedValue, true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    color = resources.getColor(typedValue.resourceId, theme);
+                } else {
+                    color = resources.getColor(typedValue.resourceId);
+                }
+            } else {
+                color = stateList.getDefaultColor();
+            }
+            return color;
+        } finally {
+            typedArray.recycle();
+        }
     }
 
 }

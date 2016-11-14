@@ -12,6 +12,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.annotation.AttrRes;
+import android.support.annotation.ColorInt;
 import android.support.annotation.StyleableRes;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -24,21 +25,6 @@ import my.fun.asyncload.imageloader.utils.DensityUtils;
  * Created by admin on 2016/11/1.
  */
 public class CustomCircleView extends View {
-    //形状
-    private enum SHAPE {
-        RING, SECTOR
-    }
-
-    //text 样式
-    private enum TEXT_STYLE {
-        NORMAL, BOLD, ITALIC
-    }
-
-    //text 位置
-    private enum TEXT_ALIGN {
-        CENTER, LEFT, RIGHT
-    }
-
     //形状，扇形 or 圆环
     private SHAPE mShape;
     private Paint mPaint;
@@ -68,15 +54,12 @@ public class CustomCircleView extends View {
     private float mPercent;
     //动画完成时间
     private int mDuration;
-
     public CustomCircleView(Context context) {
         this(context, null);
     }
-
     public CustomCircleView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-
     public CustomCircleView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
@@ -118,6 +101,7 @@ public class CustomCircleView extends View {
      * Get color from reference or color
      * index: styleable index, ex, R.styleable.yourAttr
      */
+    @ColorInt
     private int getColor(@StyleableRes int index, TypedArray typedArray, Context context, @AttrRes int defaultAttrColor) {
         Resources.Theme theme = context.getTheme();
         Resources resources = context.getResources();
@@ -131,8 +115,7 @@ public class CustomCircleView extends View {
             } else {
                 color = resources.getColor(value.resourceId);
             }
-        }
-        if(list!=null){
+        } else if (list != null) {
             color = list.getDefaultColor();
         }
         return color;
@@ -268,6 +251,21 @@ public class CustomCircleView extends View {
                 }
             }
         }).start();
+    }
+
+    //形状
+    private enum SHAPE {
+        RING, SECTOR
+    }
+
+    //text 样式
+    private enum TEXT_STYLE {
+        NORMAL, BOLD, ITALIC
+    }
+
+    //text 位置
+    private enum TEXT_ALIGN {
+        CENTER, LEFT, RIGHT
     }
 
 }
