@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.AttrRes;
 import android.support.annotation.DimenRes;
@@ -182,22 +183,27 @@ public class DialogActivity extends BaseActivity {
 
         Button cancelButton = (Button) findViewById(R.id.cancelButton);
         Button confirmButton = (Button) findViewById(R.id.confirmButton);
-        cancelButton.setText(R.string.cancel_string);
-        confirmButton.setText(R.string.confirm_string);
+
         StateListDrawable stateListDrawable = initStateList(context);
-        cancelButton.setBackground(stateListDrawable);
-        confirmButton.setBackground(stateListDrawable);
+//        cancelButton.setBackground(stateListDrawable);
+//        confirmButton.setBackground(stateListDrawable);
     }
 
     private StateListDrawable initStateList(Context context) {
         Resources resources = context.getResources();
         Resources.Theme theme = context.getTheme();
         StateListDrawable drawableStateList = new StateListDrawable();
-        GradientDrawable normalDrawable = getGradientDrawable(context, R.attr.myColorPrimaryLight, R.dimen.normalButtonRadius, GradientDrawable.RECTANGLE);
-        GradientDrawable pressedDrawable = getGradientDrawable(context, R.attr.myColorPrimaryDark, R.dimen.normalButtonRadius, GradientDrawable.RECTANGLE);
+//        GradientDrawable normalDrawable = getGradientDrawable(context, R.attr.myColorPrimaryLight, R.dimen.normalButtonRadius, GradientDrawable.RECTANGLE);
+//        GradientDrawable pressedDrawable = getGradientDrawable(context, R.attr.myColorPrimaryDark, R.dimen.normalButtonRadius, GradientDrawable.RECTANGLE);
 
-        drawableStateList.addState(new int[]{android.R.attr.state_pressed}, pressedDrawable);
-        drawableStateList.addState(new int[]{-android.R.attr.state_pressed}, normalDrawable);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            drawableStateList.addState(new int[]{android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed, theme));
+            drawableStateList.addState(new int[]{-android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed, theme));
+        } else {
+            drawableStateList.addState(new int[]{android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed));
+            drawableStateList.addState(new int[]{-android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed));
+        }
+
         return drawableStateList;
     }
 

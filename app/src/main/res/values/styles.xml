@@ -40,4 +40,8 @@
         <item name="myColorSecondaryText">@color/colorSecondaryText_blue_gray</item>
         <item name="myColorDivider">@color/colorDivider_blue_gray</item>
     </style>
+
+    <style name="NormalButtonStyle">
+        <item name="android:background">@drawable/normal_button_selector</item>
+    </style>
 </resources>

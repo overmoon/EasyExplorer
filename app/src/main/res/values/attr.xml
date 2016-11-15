@@ -2,64 +2,64 @@
 <resources>
 
     <attr name="shape">
-        <enum name="ring" value="0"/>
-        <enum name="sector" value="1"/>
+        <enum name="ring" value="0" />
+        <enum name="sector" value="1" />
     </attr>
-    <attr name="outerRadius" format="dimension"/>
-    <attr name="ringWidth" format="dimension"/>
-    <attr name="outerRingColor" format="color|reference"/>
-    <attr name="innerCircleColor" format="color|reference"/>
-    <attr name="outerRingBackgroundColor" format="color|reference"/>
+    <attr name="outerRadius" format="dimension" />
+    <attr name="ringWidth" format="dimension" />
+    <attr name="outerRingColor" format="color|reference" />
+    <attr name="innerCircleColor" format="color|reference" />
+    <attr name="outerRingBackgroundColor" format="color|reference" />
     <!-- textView attributes -->
-    <attr name="text" format="string"/>
-    <attr name="textDisplay" format="boolean"/>
-    <attr name="percentDisplay" format="boolean"/>
-    <attr name="textSize" format="dimension"/>
-    <attr name="textColor" format="color|reference"/>
-    <attr name= "textStyle">
-        <enum name= "normal" value ="0" />
-        <enum name= "bold" value ="1" />
-        <enum name= "italic" value ="2" />
+    <attr name="text" format="string" />
+    <attr name="textDisplay" format="boolean" />
+    <attr name="percentDisplay" format="boolean" />
+    <attr name="textSize" format="dimension" />
+    <attr name="textColor" format="color|reference" />
+    <attr name="textStyle">
+        <enum name="normal" value="0" />
+        <enum name="bold" value="1" />
+        <enum name="italic" value="2" />
     </attr>
-    <attr name= "textAlign">
-        <enum name= "left" value ="0" />
-        <enum name= "center" value ="1" />
-        <enum name= "right" value ="2" />
+    <attr name="textAlign">
+        <enum name="left" value="0" />
+        <enum name="center" value="1" />
+        <enum name="right" value="2" />
     </attr>
-    <attr name="max" format="float"/>
-    <attr name="process" format="float"/>
-    <attr name="percent" format="float"/>
-    <attr name="duration" format="integer"/>
+    <attr name="max" format="float" />
+    <attr name="process" format="float" />
+    <attr name="percent" format="float" />
+    <attr name="duration" format="integer" />
 
-    <attr name="myColorPrimaryDark" format="color"/>
-    <attr name="myColorPrimary" format="color"/>
-    <attr name="myColorPrimaryLight" format="color"/>
-    <attr name="myColorText" format="color"/>
-    <attr name="myColorAccent" format="color"/>
-    <attr name="myColorPrimaryText" format="color"/>
-    <attr name="myColorSecondaryText" format="color"/>
-    <attr name="myColorDivider" format="color"/>
+    <attr name="myColorPrimaryDark" format="color|reference" />
+    <attr name="myColorPrimary" format="color|reference" />
+    <attr name="myColorPrimaryLight" format="color|reference" />
+    <attr name="myColorText" format="color|reference" />
+    <attr name="myColorAccent" format="color|reference" />
+    <attr name="myColorPrimaryText" format="color|reference" />
+    <attr name="myColorSecondaryText" format="color|reference" />
+    <attr name="myColorDivider" format="color|reference" />
 
     <declare-styleable name="CustomCircleView">
         <!-- circle attributes -->
-        <attr name="shape"/>
-        <attr name="outerRadius"/>
+        <attr name="shape" />
+        <attr name="outerRadius" />
         <attr name="ringWidth" />
-        <attr name="outerRingColor"/>
-        <attr name="innerCircleColor"/>
-        <attr name="outerRingBackgroundColor"/>
+        <attr name="outerRingColor" />
+        <attr name="innerCircleColor" />
+        <attr name="outerRingBackgroundColor" />
         <!-- textView attributes -->
-        <attr name="text"/>
-        <attr name="textDisplay"/>
-        <attr name="percentDisplay"/>
-        <attr name="textSize"/>
-        <attr name="textColor"/>
-        <attr name= "textStyle"/>
-        <attr name= "textAlign"/>
-        <attr name="max"/>
-        <attr name="process"/>
-        <attr name="duration"/>
-        <attr name="percent"/>
+        <attr name="text" />
+        <attr name="textDisplay" />
+        <attr name="percentDisplay" />
+        <attr name="textSize" />
+        <attr name="textColor" />
+        <attr name="textStyle" />
+        <attr name="textAlign" />
+        <attr name="max" />
+        <attr name="process" />
+        <attr name="duration" />
+        <attr name="percent" />
     </declare-styleable>
 
 </resources>

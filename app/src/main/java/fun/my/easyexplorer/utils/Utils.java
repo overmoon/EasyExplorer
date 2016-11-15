@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Toast;
 
@@ -584,17 +585,10 @@ public class Utils {
         int color = 0;
         TypedArray typedArray = theme.obtainStyledAttributes(new int[]{colorAttr});
         try {
-            TypedValue value = new TypedValue();
-            typedArray.getValue(0, value);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                color = resources.getColor(value.resourceId, theme);
-            } else {
-                color = resources.getColor(value.resourceId);
-            }
-            ColorStateList stateList = null;//typedArray.getColorStateList(resources.gecolorAttr);
-
+            ColorStateList stateList = null;
+            int id = typedArray.getResourceId(0, 0);
+            Log.d("", id + "");
             if (stateList == null) {
-
 
                 TypedValue typedValue = new TypedValue();
                 theme.resolveAttribute(colorAttr, typedValue, true);
