@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/main_recycleItem_margin_vertical"
     android:layout_marginTop="@dimen/main_recycleItem_margin_vertical"
-    android:background="@drawable/subitem_selector"
+    android:background="@drawable/tblue_subitem_selector"
     android:orientation="vertical">
 
     <TextView

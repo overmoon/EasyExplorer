@@ -15,6 +15,10 @@
         <item name="myColorPrimaryText">@color/colorPrimaryText_blue</item>
         <item name="myColorSecondaryText">@color/colorSecondaryText_blue</item>
         <item name="myColorDivider">@color/colorDivider_blue</item>
+        <item name="normalButtonSelector">@drawable/tblue_normal_button_selector</item>
+        <item name="circleButtonSelector">@drawable/tblue_circle_button_selector</item>
+        <item name="itemBackgroundSelector">@drawable/tblue_item_selector</item>
+        <item name="subItemBackgroundSelector">@drawable/tblue_subitem_selector</item>
     </style>
 
     <style name="Theme.Gray" parent="AppTheme">
@@ -41,7 +45,4 @@
         <item name="myColorDivider">@color/colorDivider_blue_gray</item>
     </style>
 
-    <style name="NormalButtonStyle">
-        <item name="android:background">@drawable/normal_button_selector</item>
-    </style>
 </resources>

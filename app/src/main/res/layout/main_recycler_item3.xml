@@ -11,7 +11,7 @@
         android:id="@+id/addButton"
         android:layout_width="@dimen/circleButtonSize"
         android:layout_height="@dimen/circleButtonSize"
-        android:background="@drawable/circle_button_selector"
+        android:background="@drawable/tblue_circle_button_selector"
         android:text="+"
         android:textSize="20sp" />
 

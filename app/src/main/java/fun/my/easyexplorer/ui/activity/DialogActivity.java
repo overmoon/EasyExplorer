@@ -2,14 +2,8 @@ package fun.my.easyexplorer.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.AttrRes;
-import android.support.annotation.DimenRes;
 import android.support.v7.widget.ListPopupWindow;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -184,35 +178,6 @@ public class DialogActivity extends BaseActivity {
         Button cancelButton = (Button) findViewById(R.id.cancelButton);
         Button confirmButton = (Button) findViewById(R.id.confirmButton);
 
-        StateListDrawable stateListDrawable = initStateList(context);
-//        cancelButton.setBackground(stateListDrawable);
-//        confirmButton.setBackground(stateListDrawable);
-    }
-
-    private StateListDrawable initStateList(Context context) {
-        Resources resources = context.getResources();
-        Resources.Theme theme = context.getTheme();
-        StateListDrawable drawableStateList = new StateListDrawable();
-//        GradientDrawable normalDrawable = getGradientDrawable(context, R.attr.myColorPrimaryLight, R.dimen.normalButtonRadius, GradientDrawable.RECTANGLE);
-//        GradientDrawable pressedDrawable = getGradientDrawable(context, R.attr.myColorPrimaryDark, R.dimen.normalButtonRadius, GradientDrawable.RECTANGLE);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            drawableStateList.addState(new int[]{android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed, theme));
-            drawableStateList.addState(new int[]{-android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed, theme));
-        } else {
-            drawableStateList.addState(new int[]{android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed));
-            drawableStateList.addState(new int[]{-android.R.attr.state_pressed}, resources.getDrawable(R.drawable.normal_button_pressed));
-        }
-
-        return drawableStateList;
-    }
-
-    private GradientDrawable getGradientDrawable(Context context, @AttrRes int colorAttr, @DimenRes int cornerDimen, int shape) {
-        GradientDrawable normalShapeDrawable = new GradientDrawable();
-        normalShapeDrawable.setColor(Utils.getThemeAttrColor(context, colorAttr));
-        normalShapeDrawable.setCornerRadius(context.getResources().getDimensionPixelSize(cornerDimen));
-        normalShapeDrawable.setShape(shape);
-        return normalShapeDrawable;
     }
 
     //打开图片选择窗口

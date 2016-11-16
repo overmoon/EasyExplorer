@@ -62,4 +62,8 @@
         <attr name="percent" />
     </declare-styleable>
 
+    <attr name="circleButtonSelector" format="reference" />
+    <attr name="normalButtonSelector" format="reference" />
+    <attr name="itemBackgroundSelector" format="reference" />
+    <attr name="subItemBackgroundSelector" format="reference" />
 </resources>

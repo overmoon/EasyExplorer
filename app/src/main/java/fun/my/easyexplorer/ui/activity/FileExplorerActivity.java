@@ -303,7 +303,7 @@ public class FileExplorerActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         int size = cacheList.size();
-        if (size == 0) {
+        if (size <= 1) {
             super.onBackPressed();
         } else {
             cacheList.remove(cacheList.size() - 1);

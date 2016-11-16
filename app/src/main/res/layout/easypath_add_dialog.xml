@@ -135,17 +135,17 @@
 
         <Button
             android:id="@+id/cancelButton"
-            style="@style/NormalButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
+            android:background="?attr/normalButtonSelector"
             android:text="@string/cancel_string" />
 
         <Button
             android:id="@+id/confirmButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/normal_button_selector"
+            android:background="?attr/normalButtonSelector"
             android:text="@string/confirm_string" />
 
     </LinearLayout>
