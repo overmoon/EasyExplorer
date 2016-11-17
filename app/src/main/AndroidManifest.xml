@@ -20,7 +20,8 @@
         </activity>
         <activity android:name=".ui.activity.FileExplorerActivity" />
         <activity
-            android:name=".ui.activity.DialogActivity" />
+            android:name=".ui.activity.DialogActivity"
+            android:theme="@style/DialogActivity.Blue" />
     </application>
 
 </manifest>

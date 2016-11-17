@@ -15,10 +15,13 @@ import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 
+import java.util.ArrayList;
+
 import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.ValuePair;
 import fun.my.easyexplorer.ui.adapter.ListPopupAdapter;
+import fun.my.easyexplorer.utils.JsonUtils;
 import fun.my.easyexplorer.utils.UriUtils;
 import fun.my.easyexplorer.utils.Utils;
 
@@ -35,15 +38,15 @@ public class DialogActivity extends BaseActivity {
     private EditText appName_editText, tag_dialog_editTextView, path_dialog_editTextView;
     private ImageView dialog_imageView, popItem_dialog_imageView, path_dialog_imageView;
     private View dialog_divider1;
-    private boolean isShowing;
     private AppInfo appInfoGlobal;
     private ValuePair valuePairGlobal;
+    private boolean trigger;
 
     @Override
     protected void initVariables() {
-        isShowing = false;
         appInfoGlobal = new AppInfo();
         valuePairGlobal = new ValuePair();
+        trigger = true;
     }
 
     @Override
@@ -68,7 +71,7 @@ public class DialogActivity extends BaseActivity {
 
         listPopupWindow.setAdapter(popupAdapter);
         listPopupWindow.setHeight(400);
-        listPopupWindow.setModal(true);
+        listPopupWindow.setModal(false);
         listPopupWindow.setAnchorView(dialog_divider1);
         listPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -83,6 +86,7 @@ public class DialogActivity extends BaseActivity {
                 //标记被点击
                 appName_editText.setTag(true);
                 appName_editText.setText(appInfo.getAppName());
+                appName_editText.setSelection(appInfo.getAppName().length());
                 listPopupWindow.dismiss();
                 appInfoGlobal.setAppName(appInfo.getAppName());
                 appInfoGlobal.setPackageName(appInfo.getPackageName());
@@ -92,7 +96,7 @@ public class DialogActivity extends BaseActivity {
         listPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                listPopupWindowDismiss();
+                popItem_dialog_imageView.setImageResource(R.drawable.popdown_selector);
             }
         });
 
@@ -146,10 +150,10 @@ public class DialogActivity extends BaseActivity {
                     @Override
                     public void onFilterComplete(int count) {
                         //if adapter data not empty and popup window not shown
-                        if (count == 0 && isShowing) {
+                        if (count == 0 && listPopupWindow.isShowing()) {
                             listPopupWindowDismiss();
                         }
-                        if (count != 0 && !isShowing) {
+                        if (count != 0 && !listPopupWindow.isShowing()) {
                             listPopupWindowShow();
                         }
                     }
@@ -167,16 +171,41 @@ public class DialogActivity extends BaseActivity {
         popItem_dialog_imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isShowing) {
+                if (!listPopupWindow.isShowing() && trigger) {
                     listPopupWindowShow();
                 } else {
-                    listPopupWindowDismiss();
+                    trigger = true;
                 }
             }
         });
 
         Button cancelButton = (Button) findViewById(R.id.cancelButton);
         Button confirmButton = (Button) findViewById(R.id.confirmButton);
+        //取消按钮，返回之前
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+        //确认按钮，保存数据
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                appInfoGlobal.setAppName(appName_editText.getText().toString());
+                //获取<tag, path>
+                valuePairGlobal.setName(tag_dialog_editTextView.getText().toString());
+                valuePairGlobal.setValue(path_dialog_editTextView.getText().toString());
+                //设置appInfo的list
+                appInfoGlobal.setValuePairList(new ArrayList<ValuePair>() {
+                    {
+                        add(valuePairGlobal);
+                    }
+                });
+                JsonUtils.saveAppInfo(appInfoGlobal);
+            }
+        });
 
     }
 
@@ -190,23 +219,25 @@ public class DialogActivity extends BaseActivity {
 
     void listPopupWindowShow() {
         listPopupWindow.show();
-        isShowing = true;
+        trigger = false;
         popItem_dialog_imageView.setImageResource(R.drawable.popup_selector);
     }
 
     void listPopupWindowDismiss() {
         listPopupWindow.dismiss();
-        isShowing = false;
+        trigger = true;
         popItem_dialog_imageView.setImageResource(R.drawable.popdown_selector);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE) {
-            Uri uri = data.getData();
-            String path = UriUtils.getPath(this, uri);
-            dialog_imageView.setImageDrawable(Utils.getDrawableFromFile(path));
-            appInfoGlobal.setDrawableFile(path);
+            if (data != null) {
+                Uri uri = data.getData();
+                String path = UriUtils.getPath(this, uri);
+                dialog_imageView.setImageDrawable(Utils.getDrawableFromFile(path));
+                appInfoGlobal.setDrawableFile(path);
+            }
         } else if (requestCode == REQUEST_PATH) {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra("path");

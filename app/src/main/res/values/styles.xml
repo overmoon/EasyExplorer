@@ -45,4 +45,17 @@
         <item name="myColorDivider">@color/colorDivider_blue_gray</item>
     </style>
 
+    <style name="DialogActivity" parent="Base.Theme.AppCompat.Dialog"></style>
+
+    <style name="DialogActivity.Blue">
+        <item name="myColorPrimaryLight">@color/colorPrimaryLight_blue</item>
+        <item name="myColorPrimary">@color/colorPrimary_blue</item>
+        <item name="myColorPrimaryDark">@color/colorPrimaryDark_blue</item>
+        <item name="myColorText">@color/colorText_blue</item>
+        <item name="myColorAccent">@color/colorAccent_blue</item>
+        <item name="myColorPrimaryText">@color/colorPrimaryText_blue</item>
+        <item name="myColorSecondaryText">@color/colorSecondaryText_blue</item>
+        <item name="myColorDivider">@color/colorDivider_blue</item>
+        <item name="normalButtonSelector">@drawable/tblue_normal_button_selector</item>
+    </style>
 </resources>
