@@ -13,7 +13,7 @@
         android:layout_height="@dimen/circleButtonSize"
         android:background="@drawable/tblue_circle_button_selector"
         android:text="+"
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
 </LinearLayout>
 

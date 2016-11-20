@@ -4,13 +4,16 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,7 @@ import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.ui.adapter.MainRecyclerListAdapter;
+import fun.my.easyexplorer.utils.JsonUtils;
 import fun.my.easyexplorer.utils.MountPointUtils;
 import fun.my.easyexplorer.utils.Utils;
 
@@ -51,10 +55,6 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        appInfos = Utils.getAppInfoList5(this);
-//        Gson gson = new Gson();
-//        String json = gson.toJson(appInfos.get(0));
-//        System.out.println(json);
     }
 
     protected void initViews(Bundle savedInstanceState) {
@@ -65,12 +65,56 @@ public class MainActivity extends BaseActivity {
         recyclerView.setAdapter(adapter);
     }
 
+    @Override
     protected void loadData() {
+
+    }
+
+    protected void loadDatas() {
         adapterDataList.clear();
         adapterDataList.addAll(getMountedPoints(this));
-        adapterDataList.addAll(appInfos);
         adapterDataList.add(new Object());
+        new AsyncTask<Context, Void, List>() {
+            @Override
+            protected List doInBackground(Context[] params) {
+                List<AppInfo> infos = null;
+                try {
+                    infos = JsonUtils.getAppInfos(params[0], null);
+                    infos = getAppDrawable(params[0], infos);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return infos;
+            }
+
+            @Override
+            protected void onPostExecute(List appInfos) {
+                if (appInfos != null) {
+                    adapterDataList.addAll(adapterDataList.size() - 1, appInfos);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }.execute(this);
+
         adapter.notifyDataSetChanged();
+    }
+
+    //获取appinfo的drawable
+    private List<AppInfo> getAppDrawable(Context context, List<AppInfo> appInfos) {
+        if (appInfos != null) {
+            for (AppInfo info : appInfos) {
+                String filePath = info.getDrawableFile();
+                //从文件路径中获取drawable
+                if (!TextUtils.isEmpty(info.getDrawableFile())) {
+                    info.setDrawable(Utils.getDrawableFromFile(filePath));
+                } else if (!TextUtils.isEmpty(info.getPackageName())) {
+                    //从系统中获取应用drawable
+                    info.setDrawable(Utils.getAppDrawableIcon(context, info.getPackageName()));
+                }
+            }
+        }
+
+        return appInfos;
     }
 
     private List getMountedPoints(Context context) {
@@ -83,5 +127,11 @@ public class MainActivity extends BaseActivity {
         Intent intent = new Intent(MainActivity.this, FileExplorerActivity.class);
         intent.putExtra("path", path);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDatas();
     }
 }

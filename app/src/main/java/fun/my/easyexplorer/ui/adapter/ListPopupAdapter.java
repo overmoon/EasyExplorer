@@ -15,7 +15,6 @@ import java.util.List;
 
 import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
-import fun.my.easyexplorer.utils.Utils;
 
 /**
  * Created by admin on 2016/11/9.
@@ -88,9 +87,6 @@ public class ListPopupAdapter extends BaseAdapter implements Filterable {
 
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            if (originalInfos.size() == 0 && context != null) {
-                originalInfos = Utils.getAppInfoList(context);
-            }
             FilterResults results = new FilterResults();
             if (constraint == null) {
                 results.values = originalInfos;
@@ -110,7 +106,8 @@ public class ListPopupAdapter extends BaseAdapter implements Filterable {
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            appInfos = (List<AppInfo>) results.values;
+            appInfos.clear();
+            appInfos.addAll((List<AppInfo>) results.values);
             notifyDataSetChanged();
         }
     }

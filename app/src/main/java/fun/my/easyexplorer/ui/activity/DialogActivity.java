@@ -3,6 +3,7 @@ package fun.my.easyexplorer.ui.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.ListPopupWindow;
 import android.text.Editable;
@@ -15,7 +16,9 @@ import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
@@ -40,12 +43,14 @@ public class DialogActivity extends BaseActivity {
     private View dialog_divider1;
     private AppInfo appInfoGlobal;
     private ValuePair valuePairGlobal;
+    private List<AppInfo> appInfos;
     private boolean trigger;
 
     @Override
     protected void initVariables() {
         appInfoGlobal = new AppInfo();
         valuePairGlobal = new ValuePair();
+        appInfos = new ArrayList<>();
         trigger = true;
     }
 
@@ -58,7 +63,21 @@ public class DialogActivity extends BaseActivity {
 
     @Override
     protected void loadData() {
+        new AsyncTask<Object, Void, List>() {
 
+            @Override
+            protected List doInBackground(Object[] params) {
+                Context context = (Context) params[0];
+                return Utils.getAppInfoList(context, Utils.FILTER_THIRD_APP);
+            }
+
+            @Override
+            protected void onPostExecute(List o) {
+                appInfos.clear();
+                appInfos.addAll(o);
+                popupAdapter.notifyDataSetChanged();
+            }
+        }.execute(this);
     }
 
     //初始化popupwindow
@@ -67,7 +86,7 @@ public class DialogActivity extends BaseActivity {
         listPopupWindow = new ListPopupWindow(context);
 
         //init adapter
-        popupAdapter = new ListPopupAdapter(context);
+        popupAdapter = new ListPopupAdapter(context, appInfos);
 
         listPopupWindow.setAdapter(popupAdapter);
         listPopupWindow.setHeight(400);
@@ -203,7 +222,30 @@ public class DialogActivity extends BaseActivity {
                         add(valuePairGlobal);
                     }
                 });
-                JsonUtils.saveAppInfo(appInfoGlobal);
+                //异步保存
+                new AsyncTask<Void, Void, Boolean>() {
+                    @Override
+                    protected Boolean doInBackground(Void... params) {
+                        try {
+                            return JsonUtils.saveAppInfo(DialogActivity.this, appInfoGlobal);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return false;
+                        }
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean aBoolean) {
+                        Context ctx = DialogActivity.this.getApplicationContext();
+                        if (aBoolean) {
+                            Utils.messageShort(ctx, "保存成功");
+                            finish();
+                        } else {
+                            Utils.messageShort(ctx, "保存失败");
+                        }
+                    }
+                }.execute();
+
             }
         });
 

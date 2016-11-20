@@ -9,9 +9,13 @@ import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +45,10 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     public final static int MOUNT_POINT = 0;
     public final static int NORMAL_FILE = 1;
     public final static int ADD_BUTTON = 2;
-
+    // 手势识别
+    GestureDetector detector;
+    int downX, downY;
+    boolean pressed = false;
     private Context context;
     private List objList;
     private CustomCircleView customCircleView;
@@ -51,7 +58,6 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     private LinearLayout list_item2_linearLayout;
     private OnItemClickedListener itemClickedListener;
     private OnItemLongClickedListener itemLongClickedListener;
-
     private AlertDialog dialog;
     private ListPopupWindow listPopupWindow;
     private List<AppInfo> appInfos;
@@ -76,7 +82,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     @Override
     public RecyclerListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View item;
-        RecyclerListViewHolder viewHolder;
+        RecyclerListViewHolder viewHolder = null;
         if (viewType == MOUNT_POINT) {
             item = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_recycler_item1, parent, false);
             viewHolder = new RecyclerListViewHolder(item);
@@ -91,7 +97,8 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             viewHolder.set(R.id.appTextView);
             viewHolder.set(R.id.packageTextView);
             viewHolder.set(R.id.list_item2_linearLayout);
-        } else {
+            viewHolder.set(R.id.edit_linearLayout);
+        } else if (viewType == ADD_BUTTON) {
             item = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_recycler_item3, parent, false);
             viewHolder = new RecyclerListViewHolder(item);
             viewHolder.set(R.id.addButton);
@@ -155,7 +162,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                     tag_textView.setText((String) valuePair.getName());
                     easyPath_textView.setText((String) valuePair.getValue());
                     view.setTag(valuePair);
-
+                    //设置子view的点击事件
                     view.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -170,9 +177,16 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                             }
                         }
                     });
+                    //设置子view的onTouch事件
+                    view.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            detector = new GestureDetector(context, new MyOnGestureListener(v));
+                            return detector.onTouchEvent(event);
+                        }
+                    });
                     list_item2_linearLayout.addView(view);
                 }
-
             }
 
         } else {
@@ -213,6 +227,31 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         );
     }
 
+    // subitem的touch事件，判断是否滑动
+    private boolean onTouchSubItem(View v, MotionEvent event) {
+        int action = event.getAction();
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        if (action == MotionEvent.ACTION_DOWN) {
+            downX = x;
+            downY = y;
+            System.out.println("action down at: x=" + downX + " y=" + downY);
+            return true;
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            int i = event.getHistorySize();
+            if (i > 1) {
+                int tx = (int) event.getHistoricalX(i - 1);
+                int ty = (int) event.getHistoricalY(i - 1);
+                System.out.println("action move : delatX=" + (x - tx) + " y=" + (y - ty));
+            }
+            return true;
+        } else if (action == MotionEvent.ACTION_UP) {
+
+            downX = downY = 0;
+            pressed = false;
+        }
+        return false;
+    }
 
     @Override
     public int getItemCount() {
@@ -350,5 +389,50 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
     public interface OnItemLongClickedListener {
         void onItemLongClicked(View v, int position);
+    }
+
+    // 手势识别listener
+    class MyOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private View view;
+        private View edit_linearLayout;
+        private int width, height;
+        private float startX, startY;
+
+        public MyOnGestureListener(View view) {
+            this.view = view;
+            edit_linearLayout = view.findViewById(R.id.edit_linearLayout);
+            width = edit_linearLayout.getWidth();
+            height = edit_linearLayout.getHeight();
+            startX = edit_linearLayout.getX();
+            startY = edit_linearLayout.getY();
+        }
+
+        //快速滑动并抬手
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            float x1 = e1.getX();
+            float y1 = e1.getY();
+            float x2 = e2.getX();
+            float y2 = e2.getY();
+            float deltaX = x2 - x1;
+            float deltaY = y2 - y1;
+            //判断滑动方向, 如果x方向移动距离为y的1.5倍，则为左右滑动
+            if (Math.abs(deltaY) < 1.5 * Math.abs(deltaX)) {
+                //如果快速滑动的距离有1/4编辑栏宽度，则显示
+                if (Math.abs(deltaX) > width / 5) {
+                    Animation animation = new TranslateAnimation(startX, width * (deltaX > 0 ? -1 : 1), startY, 0);
+                    edit_linearLayout.startAnimation(animation);
+                    return true;
+                }
+            }
+            return super.onFling(e1, e2, velocityX, velocityY);
+        }
+
+        //在屏幕上滑动
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+
+            return super.onScroll(e1, e2, distanceX, distanceY);
+        }
     }
 }

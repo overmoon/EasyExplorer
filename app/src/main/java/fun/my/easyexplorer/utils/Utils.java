@@ -1,6 +1,7 @@
 package fun.my.easyexplorer.utils;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import fun.my.easyexplorer.model.AppInfo;
-import fun.my.easyexplorer.model.ValuePair;
 import my.fun.asyncload.imageloader.utils.BitmapUtils;
 
 /**
@@ -34,6 +34,10 @@ public class Utils {
 
     public final static int SHORT = Toast.LENGTH_SHORT;
     public final static int LONG = Toast.LENGTH_LONG;
+    public static final int FILTER_ALL_APP = 0; // 所有应用程序
+    public static final int FILTER_SYSTEM_APP = 1; // 系统程序
+    public static final int FILTER_THIRD_APP = 2; // 第三方应用程序
+    public static final int FILTER_SDCARD_APP = 3; // 安装在SDCard的应用程序
     private static final HashMap<String, String> MIME_MapTable = new HashMap<String, String>() {
         //{后缀名，MIME类型}
         {
@@ -479,25 +483,6 @@ public class Utils {
         }
     };
 
-    public static List<AppInfo> getAppInfoList5(Context context) {
-        PackageManager pm = context.getPackageManager();
-        List<AppInfo> appInfos = new ArrayList();
-        List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
-        for (int i = 0; i < 5; i++) {
-            PackageInfo info = apps.get(i);
-            String packageName = info.packageName;
-            String appName = info.applicationInfo.loadLabel(pm).toString();
-            Drawable drawable = info.applicationInfo.loadIcon(pm);
-            AppInfo appInfo = new AppInfo(appName, packageName, drawable);
-            ArrayList arrayList = new ArrayList();
-            arrayList.add(new ValuePair<String, String>("tag", "easypath"));
-            appInfo.setValuePairList(arrayList);
-            appInfos.add(appInfo);
-        }
-        appInfos.get(2).getValuePairList().add(new ValuePair<String, String>("tag1", "/storage"));
-        return appInfos;
-    }
-
     public static Drawable getAppDrawableIcon(Context context, String packageName) {
         PackageManager pm = context.getPackageManager();
         try {
@@ -508,17 +493,40 @@ public class Utils {
         return null;
     }
 
-    public static List<AppInfo> getAppInfoList(Context context) {
+    //获取应用列表，根据flag区分
+    public static List<AppInfo> getAppInfoList(Context context, int flag) {
         PackageManager pm = context.getPackageManager();
         List appInfos = new ArrayList();
         List<PackageInfo> apps = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
-        for (PackageInfo info : apps) {
-            String packageName = info.packageName;
-            String appName = info.applicationInfo.loadLabel(pm).toString();
-            Drawable drawable = info.applicationInfo.loadIcon(pm);
-            AppInfo appInfo = new AppInfo(appName, packageName, drawable);
-            appInfos.add(appInfo);
+        switch (flag) {
+            case FILTER_ALL_APP:
+                for (PackageInfo info : apps) {
+                    appInfos.add(new AppInfo(info, pm));
+                }
+                break;
+            case FILTER_THIRD_APP:
+                for (PackageInfo info : apps) {
+                    //非系统应用 或 update后成为非系统应用
+                    if ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0
+                            || (info.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                        appInfos.add(new AppInfo(info, pm));
+                    }
+                }
+                break;
+            case FILTER_SYSTEM_APP:
+                for (PackageInfo info : apps) {
+                    if ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+                        appInfos.add(new AppInfo(info, pm));
+                }
+                break;
+            case FILTER_SDCARD_APP:
+                for (PackageInfo info : apps) {
+                    if ((info.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0)
+                        appInfos.add(new AppInfo(info, pm));
+                }
+                break;
         }
+
         return appInfos;
     }
 

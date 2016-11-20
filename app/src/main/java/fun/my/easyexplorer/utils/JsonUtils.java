@@ -1,10 +1,13 @@
 package fun.my.easyexplorer.utils;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,6 +16,7 @@ import java.util.List;
 
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.ValuePair;
+import my.fun.asyncload.imageloader.utils.DiskCacheUtils;
 
 /**
  * Created by admin on 2016/11/13.
@@ -20,14 +24,15 @@ import fun.my.easyexplorer.model.ValuePair;
 
 public class JsonUtils {
 
-    private static final String DEFAULT_FILE = "";
+    private static final String DEFAULT_FILE_NAME = "appInfos.json";
+    private static final String DEFAULT_DIR_NAME = "data";
 
     //保存appInfo
-    public static void saveAppInfo(AppInfo appInfoGlobal) {
+    public static boolean saveAppInfo(Context context, AppInfo appInfoGlobal) throws IOException {
         if (appInfoGlobal == null)
-            return;
+            return true;
 
-        List<AppInfo> appInfos = getAppInfos(DEFAULT_FILE);
+        List<AppInfo> appInfos = getAppInfos(context, DEFAULT_FILE_NAME);
         // 如果appInfos不为空
         if (appInfos != null) {
             String appName = appInfoGlobal.getAppName();
@@ -61,41 +66,58 @@ public class JsonUtils {
             appInfos = new ArrayList<>();
             appInfos.add(appInfoGlobal);
         }
-        Gson gson = new Gson();
-        String json = gson.toJson(appInfos);
-        //写入文件
-        try {
-            writeToFile(json, DEFAULT_FILE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
+        String json = gson.toJson(appInfos);
+        //json写入文件
+        File file = getDataFile(context, DEFAULT_FILE_NAME);
+        writeToFile(json, file);
+        return true;
     }
 
     //从文件中获取appInfo list
-    public static List getAppInfos(String file) {
+    public static List getAppInfos(Context context, String file) throws IOException {
         if (file == null) {
-            file = DEFAULT_FILE;
+            file = DEFAULT_FILE_NAME;
         }
-        Gson gson = new Gson();
+        File f = getDataFile(context, file);
+        if (!f.exists())
+            return null;
+
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         List<AppInfo> appInfos = null;
+        JsonReader jsonReader = null;
         try {
-            JsonReader jsonReader = new JsonReader(new FileReader(file));
+            jsonReader = new JsonReader(new FileReader(f));
             appInfos = gson.fromJson(jsonReader, new TypeToken<List<AppInfo>>() {
             }.getType());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } finally {
+            jsonReader.close();
         }
 
         return appInfos;
     }
 
-    public static void writeToFile(String json, String file) throws IOException {
-        FileOutputStream out = null;
-        out = new FileOutputStream(file);
+    //写入数据
+    public static void writeToFile(String json, File file) throws IOException {
+        FileOutputStream out = out = new FileOutputStream(file);
         out.write(json.getBytes());
         if (out != null) {
             out.close();
         }
+    }
+
+    //获取json文件
+    public static File getDataFile(Context context, String fileName) throws IOException {
+        File fDir = DiskCacheUtils.getDiskCacheDir(context, DEFAULT_DIR_NAME);
+        if (!fDir.exists()) {
+            fDir.mkdirs();
+        }
+
+        File f = new File(fDir, fileName);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+        return f;
     }
 }

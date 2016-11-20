@@ -1,5 +1,7 @@
 package fun.my.easyexplorer.model;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 
 import com.google.gson.annotations.Expose;
@@ -40,6 +42,12 @@ public class AppInfo {
 
     public AppInfo() {
 
+    }
+
+    public AppInfo(PackageInfo info, PackageManager pm) {
+        packageName = info.packageName;
+        appName = info.applicationInfo.loadLabel(pm).toString();
+        drawable = info.applicationInfo.loadIcon(pm);
     }
 
     public String getAppName() {

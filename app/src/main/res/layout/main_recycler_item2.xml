@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/main_recycleItem_margin_vertical"
     android:layout_marginLeft="@dimen/main_recycleItem_margin_horizontal"
-    android:layout_marginRight="@dimen/main_recycleItem_margin_horizontal"
+    android:layout_marginRight="5dp"
     android:layout_marginTop="@dimen/main_recycleItem_margin_vertical"
     android:background="@drawable/tblue_item_background"
     android:padding="@dimen/main_recycleItem_padding">
@@ -22,7 +22,6 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/main_recycleItem_margin_vertical"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
         android:layout_toRightOf="@id/iconImageView"
         android:orientation="vertical">
 
@@ -44,12 +43,13 @@
         android:id="@+id/list_item2_linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/linearLayout1"
+        android:layout_alignLeft="@id/iconImageView"
         android:layout_below="@id/linearLayout1"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="10dp"
         android:layout_toRightOf="@id/iconImageView"
         android:orientation="vertical" />
+
+
 </RelativeLayout>
 
 
