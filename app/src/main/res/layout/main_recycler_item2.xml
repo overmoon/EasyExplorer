@@ -7,6 +7,7 @@
     android:layout_marginRight="5dp"
     android:layout_marginTop="@dimen/main_recycleItem_margin_vertical"
     android:background="@drawable/tblue_item_background"
+    android:clipChildren="false"
     android:padding="@dimen/main_recycleItem_padding">
 
     <ImageView
@@ -47,6 +48,7 @@
         android:layout_below="@id/linearLayout1"
         android:layout_gravity="center_vertical"
         android:layout_toRightOf="@id/iconImageView"
+        android:clipChildren="false"
         android:orientation="vertical" />
 
 

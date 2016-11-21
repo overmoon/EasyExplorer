@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,9 +34,9 @@ import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.model.ValuePair;
 import fun.my.easyexplorer.ui.activity.DialogActivity;
-import fun.my.easyexplorer.ui.activity.FileExplorerActivity;
 import fun.my.easyexplorer.ui.view.CustomCircleView;
 import fun.my.easyexplorer.utils.Utils;
+import my.fun.asyncload.imageloader.utils.DensityUtils;
 
 /**
  * Created by admin on 2016/11/6.
@@ -65,6 +66,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     private EditText appName_editText, tag_dialog_editTextView, path_dialog_editTextView;
     private ImageView dialog_imageView;
     private View dialog_divider1;
+    private int margin;
 
     public MainRecyclerListAdapter(List objList) {
         this.objList = objList;
@@ -156,14 +158,18 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                 View v = list_item2_linearLayout.getChildAt(i);
                 //判断是否需要重绘
                 if (v == null || v.getTag() != null && !v.getTag().equals(valuePair)) {
-                    View view = layoutInflater.inflate(R.layout.subitem, list_item2_linearLayout, false);
+                    final View view = layoutInflater.inflate(R.layout.subitem, list_item2_linearLayout, false);
                     TextView tag_textView = (TextView) view.findViewById(R.id.tag_textView);
                     TextView easyPath_textView = (TextView) view.findViewById(R.id.easyPath_textView);
+                    final View edit_view = view.findViewById(R.id.edit_linearLayout);
+
                     tag_textView.setText((String) valuePair.getName());
                     easyPath_textView.setText((String) valuePair.getValue());
                     view.setTag(valuePair);
+                    view.setClickable(true);
+                    view.setFocusable(true);
                     //设置子view的点击事件
-                    view.setOnClickListener(new View.OnClickListener() {
+                  /*  view.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             ValuePair valuePair = (ValuePair) v.getTag();
@@ -176,13 +182,14 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                                 Utils.messageShort(context, "路径不存在，请确保路径正确");
                             }
                         }
-                    });
+                    });*/
                     //设置子view的onTouch事件
                     view.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View v, MotionEvent event) {
                             detector = new GestureDetector(context, new MyOnGestureListener(v));
-                            return detector.onTouchEvent(event);
+                            boolean b = detector.onTouchEvent(event);
+                            return b;
                         }
                     });
                     list_item2_linearLayout.addView(view);
@@ -386,7 +393,6 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     public interface OnItemClickedListener {
         void onItemClicked(View view, int positon);
     }
-
     public interface OnItemLongClickedListener {
         void onItemLongClicked(View v, int position);
     }
@@ -397,42 +403,77 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         private View edit_linearLayout;
         private int width, height;
         private float startX, startY;
+        private boolean isLeft;
+
 
         public MyOnGestureListener(View view) {
             this.view = view;
+            width = DensityUtils.dip2px(context, 60);
             edit_linearLayout = view.findViewById(R.id.edit_linearLayout);
-            width = edit_linearLayout.getWidth();
-            height = edit_linearLayout.getHeight();
+            height = edit_linearLayout.getMeasuredHeight();
             startX = edit_linearLayout.getX();
             startY = edit_linearLayout.getY();
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+//            editBarShow();
+            return true;
         }
 
         //快速滑动并抬手
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            float x1 = e1.getX();
-            float y1 = e1.getY();
-            float x2 = e2.getX();
-            float y2 = e2.getY();
-            float deltaX = x2 - x1;
-            float deltaY = y2 - y1;
-            //判断滑动方向, 如果x方向移动距离为y的1.5倍，则为左右滑动
-            if (Math.abs(deltaY) < 1.5 * Math.abs(deltaX)) {
-                //如果快速滑动的距离有1/4编辑栏宽度，则显示
-                if (Math.abs(deltaX) > width / 5) {
-                    Animation animation = new TranslateAnimation(startX, width * (deltaX > 0 ? -1 : 1), startY, 0);
-                    edit_linearLayout.startAnimation(animation);
-                    return true;
-                }
-            }
             return super.onFling(e1, e2, velocityX, velocityY);
         }
 
         //在屏幕上滑动
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            System.out.print("onScroll");
+            float x1, y1;
+            edit_linearLayout.setVisibility(View.VISIBLE);
+            if (e1 != null) {
+                x1 = e1.getX();
+                y1 = e1.getY();
+                float x2 = e2.getX();
+                float y2 = e2.getY();
+                float deltaX = x2 - x1;
+                float deltaY = y2 - y1;
+            }
+            if (Math.abs(distanceX) > width) {
+                distanceX = distanceX / Math.abs(distanceX) * edit_linearLayout.getWidth();
+            }
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) edit_linearLayout.getLayoutParams();
+            lp.setMargins(0, 0, margin -= distanceX, 0);
+            edit_linearLayout.setLayoutParams(lp);
+            return true;
+        }
 
-            return super.onScroll(e1, e2, distanceX, distanceY);
+        void editBarShow() {
+            Animation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 1,
+                    Animation.RELATIVE_TO_SELF, 0,
+                    Animation.RELATIVE_TO_SELF, 0,
+                    Animation.RELATIVE_TO_SELF, 0);
+            animation.setDuration(500);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    edit_linearLayout.clearAnimation();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            edit_linearLayout.startAnimation(animation);
+            edit_linearLayout.setVisibility(View.VISIBLE);
         }
     }
 }
