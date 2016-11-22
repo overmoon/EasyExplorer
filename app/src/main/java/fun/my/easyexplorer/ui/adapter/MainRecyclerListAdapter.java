@@ -20,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +33,7 @@ import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.model.ValuePair;
 import fun.my.easyexplorer.ui.activity.DialogActivity;
+import fun.my.easyexplorer.ui.activity.FileExplorerActivity;
 import fun.my.easyexplorer.ui.view.CustomCircleView;
 import fun.my.easyexplorer.utils.Utils;
 import my.fun.asyncload.imageloader.utils.DensityUtils;
@@ -156,6 +156,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             for (int i = 0; i < size; i++) {
                 ValuePair valuePair = list.get(i);
                 View v = list_item2_linearLayout.getChildAt(i);
+
                 //判断是否需要重绘
                 if (v == null || v.getTag() != null && !v.getTag().equals(valuePair)) {
                     final View view = layoutInflater.inflate(R.layout.subitem, list_item2_linearLayout, false);
@@ -169,7 +170,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                     view.setClickable(true);
                     view.setFocusable(true);
                     //设置子view的点击事件
-                  /*  view.setOnClickListener(new View.OnClickListener() {
+                    view.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             ValuePair valuePair = (ValuePair) v.getTag();
@@ -182,16 +183,31 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                                 Utils.messageShort(context, "路径不存在，请确保路径正确");
                             }
                         }
-                    });*/
-                    //设置子view的onTouch事件
-                    view.setOnTouchListener(new View.OnTouchListener() {
+                    });
+                    //设置子view的长按事件
+                    view.setOnLongClickListener(new View.OnLongClickListener() {
                         @Override
-                        public boolean onTouch(View v, MotionEvent event) {
-                            detector = new GestureDetector(context, new MyOnGestureListener(v));
-                            boolean b = detector.onTouchEvent(event);
-                            return b;
+                        public boolean onLongClick(View v) {
+                            ValuePair valuePair = (ValuePair) v.getTag();
+                            String easyPath = (String) valuePair.getValue();
+                            if (new File(easyPath).isDirectory()) {
+                                Intent intent = new Intent(context, DialogActivity.class);
+                                intent.putExtra("path", easyPath);
+                                context.startActivity(intent);
+                            } else {
+                                Utils.messageShort(context, "路径不存在，请确保路径正确");
+                            }
+                            return true;
                         }
                     });
+                    //设置子view的onTouch事件
+//                    detector = new GestureDetector(context, new MyOnGestureListener(view));
+//                    view.setOnTouchListener(new View.OnTouchListener() {
+//                        @Override
+//                        public boolean onTouch(View v, MotionEvent event) {
+//                            return detector.onTouchEvent(event);
+//                        }
+//                    });
                     list_item2_linearLayout.addView(view);
                 }
             }
@@ -390,9 +406,14 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         }
     }
 
+    private enum STATE {
+        OPENED, OPENING, CLOSING, CLOSED
+    }
+
     public interface OnItemClickedListener {
         void onItemClicked(View view, int positon);
     }
+
     public interface OnItemLongClickedListener {
         void onItemLongClicked(View v, int position);
     }
@@ -401,22 +422,36 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     class MyOnGestureListener extends GestureDetector.SimpleOnGestureListener {
         private View view;
         private View edit_linearLayout;
-        private int width, height;
-        private float startX, startY;
-        private boolean isLeft;
-
+        private int width;
+        private float startLeft, minLeft;
+        private float minVelocity;
+        private STATE state;
 
         public MyOnGestureListener(View view) {
             this.view = view;
             width = DensityUtils.dip2px(context, 60);
             edit_linearLayout = view.findViewById(R.id.edit_linearLayout);
-            height = edit_linearLayout.getMeasuredHeight();
-            startX = edit_linearLayout.getX();
-            startY = edit_linearLayout.getY();
+            state = STATE.CLOSED;
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            ValuePair valuePair = (ValuePair) view.getTag();
+            String easyPath = (String) valuePair.getValue();
+            if (new File(easyPath).isDirectory()) {
+                Intent intent = new Intent(context, FileExplorerActivity.class);
+                intent.putExtra("path", easyPath);
+                context.startActivity(intent);
+            } else {
+                Utils.messageShort(context, "路径不存在，请确保路径正确");
+            }
+            return true;
         }
 
         @Override
         public boolean onDown(MotionEvent e) {
+            startLeft = view.getRight() - view.getLeft();
+            minLeft = startLeft - width;
 //            editBarShow();
             return true;
         }
@@ -424,38 +459,67 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         //快速滑动并抬手
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            return super.onFling(e1, e2, velocityX, velocityY);
+            System.out.println("onFling");
+            System.out.println("velocityX: " + velocityX);
+            float x1 = e1.getX();
+            float y1 = e1.getY();
+            float x2 = e2.getX();
+            float y2 = e2.getY();
+            float deltaY = y2 - y1;
+            //左划,且未打开,且加速度大于固定值
+            if (x1 - x2 > 2 * (Math.abs(deltaY))) {
+                smoothAnimateEditBar(edit_linearLayout.getLeft(), minLeft, 0);
+//                //如果已经打开
+//                if (edit_linearLayout.getLeft() == minLeft) {
+//                    state=STATE.OPENED;
+//                }else if (edit_linearLayout.getLeft() > minLeft && x1 - x2 > width / 3  && state!=STATE.OPENED) {
+//                    //如果还没打开,且已经打开了一定宽度，且加速度大于固定值，则继续打开
+//                    state=STATE.OPENING;
+//                    smoothAnimateEditBar(edit_linearLayout.getLeft(), minLeft, 0);
+//
+//                }
+            } else if (x2 - x1 > 2 * (Math.abs(deltaY)) && x2 - x1 > width / 4) {
+                //右划关闭
+//                animateEditBar(edit_linearLayout.getLeft(), startLeft);
+                return true;
+            }
+            return true;
+        }
+
+        private void smoothAnimateEditBar(final int left, final float minLeft, float velocityX) {
+            int tmp = left;
+            float deltaX = (minLeft - tmp) / 50;
+            int time = 500;
+            int deltaT = time / 50;
+            for (int i = 0; i < 500; i += deltaT) {
+
+                try {
+                    Thread.sleep(deltaT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         //在屏幕上滑动
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            System.out.print("onScroll");
-            float x1, y1;
-            edit_linearLayout.setVisibility(View.VISIBLE);
-            if (e1 != null) {
-                x1 = e1.getX();
-                y1 = e1.getY();
-                float x2 = e2.getX();
-                float y2 = e2.getY();
-                float deltaX = x2 - x1;
-                float deltaY = y2 - y1;
+            System.out.println("onScroll");
+
+            float tmpLeft = edit_linearLayout.getLeft() - distanceX;
+            if (tmpLeft < minLeft) {
+                tmpLeft = minLeft;
+            } else if (tmpLeft > startLeft) {
+                tmpLeft = startLeft;
             }
-            if (Math.abs(distanceX) > width) {
-                distanceX = distanceX / Math.abs(distanceX) * edit_linearLayout.getWidth();
-            }
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) edit_linearLayout.getLayoutParams();
-            lp.setMargins(0, 0, margin -= distanceX, 0);
-            edit_linearLayout.setLayoutParams(lp);
+            edit_linearLayout.setLeft((int) tmpLeft);
             return true;
         }
 
-        void editBarShow() {
-            Animation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 1,
-                    Animation.RELATIVE_TO_SELF, 0,
-                    Animation.RELATIVE_TO_SELF, 0,
-                    Animation.RELATIVE_TO_SELF, 0);
+        void animateEditBar(float fromX, final float toX) {
+            Animation animation = new TranslateAnimation(fromX, toX, edit_linearLayout.getY(), edit_linearLayout.getY());
             animation.setDuration(500);
+            animation.setFillAfter(true);
             animation.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
@@ -463,7 +527,6 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    edit_linearLayout.clearAnimation();
                 }
 
                 @Override
@@ -471,9 +534,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
 
                 }
             });
-
             edit_linearLayout.startAnimation(animation);
-            edit_linearLayout.setVisibility(View.VISIBLE);
         }
     }
 }

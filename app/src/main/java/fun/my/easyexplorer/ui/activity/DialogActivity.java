@@ -260,15 +260,19 @@ public class DialogActivity extends BaseActivity {
     }
 
     void listPopupWindowShow() {
-        listPopupWindow.show();
-        trigger = false;
-        popItem_dialog_imageView.setImageResource(R.drawable.popup_selector);
+        if (listPopupWindow != null) {
+            listPopupWindow.show();
+            trigger = false;
+            popItem_dialog_imageView.setImageResource(R.drawable.popup_selector);
+        }
     }
 
     void listPopupWindowDismiss() {
-        listPopupWindow.dismiss();
-        trigger = true;
-        popItem_dialog_imageView.setImageResource(R.drawable.popdown_selector);
+        if (listPopupWindow != null) {
+            listPopupWindow.dismiss();
+            trigger = true;
+            popItem_dialog_imageView.setImageResource(R.drawable.popdown_selector);
+        }
     }
 
     @Override
