@@ -2,8 +2,10 @@ package fun.my.easyexplorer.ui.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +36,10 @@ import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.model.ValuePair;
 import fun.my.easyexplorer.ui.activity.DialogActivity;
+import fun.my.easyexplorer.ui.activity.EditDialogActivity;
 import fun.my.easyexplorer.ui.activity.FileExplorerActivity;
 import fun.my.easyexplorer.ui.view.CustomCircleView;
+import fun.my.easyexplorer.utils.JsonUtils;
 import fun.my.easyexplorer.utils.Utils;
 import my.fun.asyncload.imageloader.utils.DensityUtils;
 
@@ -54,7 +59,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
     private List objList;
     private CustomCircleView customCircleView;
     private TextView titleTextView, capacityTextView, pathTextView, appTextView, packageTextView;
-    private ImageView iconImageView;
+    private ImageView iconImageView, addImageView, delImageView;
     private Button addButton;
     private LinearLayout list_item2_linearLayout;
     private OnItemClickedListener itemClickedListener;
@@ -98,8 +103,9 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             viewHolder.set(R.id.iconImageView);
             viewHolder.set(R.id.appTextView);
             viewHolder.set(R.id.packageTextView);
+            viewHolder.set(R.id.delImageView);
+            viewHolder.set(R.id.addImageView);
             viewHolder.set(R.id.list_item2_linearLayout);
-            viewHolder.set(R.id.edit_linearLayout);
         } else if (viewType == ADD_BUTTON) {
             item = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_recycler_item3, parent, false);
             viewHolder = new RecyclerListViewHolder(item);
@@ -137,8 +143,12 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             appTextView = holder.get(R.id.appTextView);
             packageTextView = holder.get(R.id.packageTextView);
             list_item2_linearLayout = holder.get(R.id.list_item2_linearLayout);
+            addImageView = holder.get(R.id.addImageView);
+            delImageView = holder.get(R.id.delImageView);
 
             AppInfo appInfo = (AppInfo) object;
+            //设置item2点击事件
+            setOnclickListener(appInfo);
             Drawable drawable = appInfo.getDrawable();
             if (drawable == null) {
                 iconImageView.setImageResource(R.mipmap.ic_launcher);
@@ -147,70 +157,8 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             }
             appTextView.setText(appInfo.getAppName());
             packageTextView.setText(appInfo.getPackageName());
-
-            LayoutInflater layoutInflater = LayoutInflater.from(context);
-
-            ArrayList<ValuePair> list = appInfo.getValuePairList();
-            int size = list.size();
-            //动态添加子view
-            for (int i = 0; i < size; i++) {
-                ValuePair valuePair = list.get(i);
-                View v = list_item2_linearLayout.getChildAt(i);
-
-                //判断是否需要重绘
-                if (v == null || v.getTag() != null && !v.getTag().equals(valuePair)) {
-                    final View view = layoutInflater.inflate(R.layout.subitem, list_item2_linearLayout, false);
-                    TextView tag_textView = (TextView) view.findViewById(R.id.tag_textView);
-                    TextView easyPath_textView = (TextView) view.findViewById(R.id.easyPath_textView);
-                    final View edit_view = view.findViewById(R.id.edit_linearLayout);
-
-                    tag_textView.setText((String) valuePair.getName());
-                    easyPath_textView.setText((String) valuePair.getValue());
-                    view.setTag(valuePair);
-                    view.setClickable(true);
-                    view.setFocusable(true);
-                    //设置子view的点击事件
-                    view.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ValuePair valuePair = (ValuePair) v.getTag();
-                            String easyPath = (String) valuePair.getValue();
-                            if (new File(easyPath).isDirectory()) {
-                                Intent intent = new Intent(context, FileExplorerActivity.class);
-                                intent.putExtra("path", easyPath);
-                                context.startActivity(intent);
-                            } else {
-                                Utils.messageShort(context, "路径不存在，请确保路径正确");
-                            }
-                        }
-                    });
-                    //设置子view的长按事件
-                    view.setOnLongClickListener(new View.OnLongClickListener() {
-                        @Override
-                        public boolean onLongClick(View v) {
-                            ValuePair valuePair = (ValuePair) v.getTag();
-                            String easyPath = (String) valuePair.getValue();
-                            if (new File(easyPath).isDirectory()) {
-                                Intent intent = new Intent(context, DialogActivity.class);
-                                intent.putExtra("path", easyPath);
-                                context.startActivity(intent);
-                            } else {
-                                Utils.messageShort(context, "路径不存在，请确保路径正确");
-                            }
-                            return true;
-                        }
-                    });
-                    //设置子view的onTouch事件
-//                    detector = new GestureDetector(context, new MyOnGestureListener(view));
-//                    view.setOnTouchListener(new View.OnTouchListener() {
-//                        @Override
-//                        public boolean onTouch(View v, MotionEvent event) {
-//                            return detector.onTouchEvent(event);
-//                        }
-//                    });
-                    list_item2_linearLayout.addView(view);
-                }
-            }
+            //添加subItems
+            addSubItems(list_item2_linearLayout, appInfo);
 
         } else {
             addButton = holder.get(R.id.addButton);
@@ -248,6 +196,137 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                                                }
 
         );
+    }
+
+    //设置item2中的点击事件
+    private void setOnclickListener(final AppInfo appInfo) {
+        //添加子项目按钮监听事件
+        addImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, EditDialogActivity.class);
+                intent.putExtra("appName", appInfo.getAppName());
+                intent.putExtra("packageName", appInfo.getPackageName());
+                ((Activity) context).startActivity(intent);
+            }
+        });
+        //删除项目按钮监听事件
+        delImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(context)
+                        .setMessage("确认删除" + appInfo.getAppName() + "分类？")
+                        .setPositiveButton(R.string.confirm_string, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(final DialogInterface dialog, int which) {
+                                new AsyncTask<Void, Void, Boolean>() {
+                                    @Override
+                                    protected Boolean doInBackground(Void... params) {
+                                        try {
+                                            return JsonUtils.deleteAppInfo(context, appInfo);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        return false;
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(Boolean aBoolean) {
+                                        if (aBoolean) {
+                                            objList.remove(appInfo);
+                                            notifyDataSetChanged();
+                                            Utils.messageShort(context, "删除成功");
+                                        } else {
+                                            Utils.messageShort(context, "删除失败");
+                                        }
+                                        dialog.dismiss();
+                                    }
+                                }.execute();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel_string, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create();
+                alertDialog.show();
+            }
+        });
+    }
+
+    private void addSubItems(LinearLayout list_item2_linearLayout, final AppInfo appInfo) {
+        final LayoutInflater layoutInflater = LayoutInflater.from(context);
+        ArrayList<ValuePair> list = appInfo.getValuePairList();
+        int size = list.size();
+        //已有的child个数
+        int childCount = list_item2_linearLayout.getChildCount();
+        //如果子view的个数大于子项的个数，则清除末尾多余的view
+        if (size < childCount) {
+            for (int i = 0; i < childCount - size; i++)
+                list_item2_linearLayout.removeViewAt(childCount - 1 - i);
+        }
+        //动态添加子view
+        for (int i = 0; i < size; i++) {
+            ValuePair valuePair = list.get(i);
+            View v = list_item2_linearLayout.getChildAt(i);
+
+            //判断是否需要重绘
+            if (v == null || v.getTag() != null && !v.getTag().equals(valuePair)) {
+                final View view = layoutInflater.inflate(R.layout.subitem, list_item2_linearLayout, false);
+                TextView tag_textView = (TextView) view.findViewById(R.id.tag_textView);
+                TextView easyPath_textView = (TextView) view.findViewById(R.id.easyPath_textView);
+
+                tag_textView.setText((String) valuePair.getName());
+                easyPath_textView.setText((String) valuePair.getValue());
+                view.setTag(valuePair);
+                view.setClickable(true);
+                view.setFocusable(true);
+                //设置子view的点击事件
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ValuePair valuePair = (ValuePair) v.getTag();
+                        String easyPath = (String) valuePair.getValue();
+                        if (new File(easyPath).isDirectory()) {
+                            Intent intent = new Intent(context, FileExplorerActivity.class);
+                            intent.putExtra("path", easyPath);
+                            context.startActivity(intent);
+                        } else {
+                            Utils.messageShort(context, "路径不存在，请确保路径正确");
+                        }
+                    }
+                });
+                //设置子view的长按事件
+                final int posiiton = i;
+                view.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        ValuePair valuePair = (ValuePair) v.getTag();
+                        Intent intent = new Intent(context, EditDialogActivity.class);
+                        intent.putExtra("appName", appInfo.getAppName());
+                        intent.putExtra("packageName", appInfo.getPackageName());
+                        intent.putExtra("valuePair", valuePair);
+                        intent.putExtra("position", posiiton);
+                        ((Activity) context).startActivityForResult(intent, -1);
+                        return true;
+                    }
+                });
+                //设置子view的onTouch事件
+//                    detector = new GestureDetector(context, new MyOnGestureListener(view));
+//                    view.setOnTouchListener(new View.OnTouchListener() {
+//                        @Override
+//                        public boolean onTouch(View v, MotionEvent event) {
+//                            return detector.onTouchEvent(event);
+//                        }
+//                    });
+                //如果有子View，则删除
+                if (childCount > i) {
+                    list_item2_linearLayout.removeViewAt(i);
+                }
+                list_item2_linearLayout.addView(view, i);
+            }
+        }
     }
 
     // subitem的touch事件，判断是否滑动
@@ -430,7 +509,6 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         public MyOnGestureListener(View view) {
             this.view = view;
             width = DensityUtils.dip2px(context, 60);
-            edit_linearLayout = view.findViewById(R.id.edit_linearLayout);
             state = STATE.CLOSED;
         }
 

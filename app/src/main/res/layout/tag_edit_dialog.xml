@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+
+    <TextView
+        android:id="@+id/dialogTitle_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/main_recycleItem_padding"
+        android:text="@string/edit_subItem_string"
+        android:textSize="@dimen/bigTextSize" />
+
+    <EditText
+        android:id="@+id/tag_dialog_editTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialogTitle_textView"
+        android:background="@null"
+        android:hint="@string/add_dialog_tag_hint"
+        android:maxLength="20"
+        android:padding="@dimen/main_recycleItem_padding" />
+
+    <View
+        android:id="@+id/dialog_divider2"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/line_height"
+        android:layout_alignLeft="@+id/tag_dialog_editTextView"
+        android:layout_alignRight="@+id/tag_dialog_editTextView"
+        android:layout_below="@+id/tag_dialog_editTextView"
+        android:background="@drawable/edittext_boarder" />
+
+    <LinearLayout
+        android:id="@+id/path_linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tag_dialog_editTextView"
+        android:layout_alignRight="@+id/tag_dialog_editTextView"
+        android:layout_below="@+id/dialog_divider2"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/path_dialog_editTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/add_dialog_path_hint"
+            android:maxLength="100"
+            android:paddingBottom="@dimen/main_recycleItem_padding"
+            android:paddingLeft="@dimen/main_recycleItem_padding"
+            android:paddingTop="@dimen/main_recycleItem_padding" />
+
+        <ImageView
+            android:id="@+id/path_dialog_imageView"
+            android:layout_width="@dimen/imageViewSize_mid"
+            android:layout_height="@dimen/imageViewSize_mid"
+            android:layout_gravity="top"
+            android:layout_marginTop="10dp"
+            android:background="@mipmap/openfolder"
+            android:clickable="true" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/dialog_divider3"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/line_height"
+        android:layout_alignLeft="@+id/tag_dialog_editTextView"
+        android:layout_alignRight="@+id/tag_dialog_editTextView"
+        android:layout_below="@+id/path_linearLayout"
+        android:background="@drawable/edittext_boarder" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_divider3"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:padding="15dp">
+
+        <Button
+            android:id="@+id/delButton"
+            android:layout_width="65dp"
+            android:layout_height="40dp"
+            android:background="?attr/normalButtonSelector"
+            android:text="@string/delete_string" />
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="65dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="?attr/normalButtonSelector"
+            android:text="@string/cancel_string" />
+
+        <Button
+            android:id="@+id/confirmButton"
+            android:layout_width="65dp"
+            android:layout_height="40dp"
+            android:background="?attr/normalButtonSelector"
+            android:text="@string/confirm_string" />
+
+    </LinearLayout>
+</RelativeLayout>

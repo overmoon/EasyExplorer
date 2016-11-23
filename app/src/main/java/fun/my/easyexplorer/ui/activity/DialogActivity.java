@@ -288,8 +288,8 @@ public class DialogActivity extends BaseActivity {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra("path");
                 path_dialog_editTextView.setText(path);
+                path_dialog_editTextView.setSelection(path.length());
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }

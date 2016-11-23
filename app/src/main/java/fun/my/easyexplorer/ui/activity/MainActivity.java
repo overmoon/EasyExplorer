@@ -27,6 +27,7 @@ import fun.my.easyexplorer.utils.Utils;
 
 public class MainActivity extends BaseActivity {
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
+    private static final int REQUEST_INSTALL_PACKAGES_REQUEST_CODE = 1;
     private List adapterDataList;
     private List<MountPoint> mountPoints;
     private List<AppInfo> appInfos;
@@ -39,6 +40,12 @@ public class MainActivity extends BaseActivity {
             //申请READ_EXTERNAL_STORAGE权限
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     READ_EXTERNAL_STORAGE_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            //申请READ_EXTERNAL_STORAGE权限
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES},
+                    REQUEST_INSTALL_PACKAGES_REQUEST_CODE);
         }
         adapterDataList = new ArrayList();
         adapter = new MainRecyclerListAdapter(this, adapterDataList);

@@ -3,6 +3,7 @@ package fun.my.easyexplorer.model;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
 
 import com.google.gson.annotations.Expose;
 
@@ -50,6 +51,13 @@ public class AppInfo {
         drawable = info.applicationInfo.loadIcon(pm);
     }
 
+    protected AppInfo(Parcel in) {
+        appName = in.readString();
+        drawableFile = in.readString();
+        packageName = in.readString();
+    }
+
+
     public String getAppName() {
         return appName;
     }
@@ -90,30 +98,5 @@ public class AppInfo {
         this.drawableFile = drawableFile;
     }
 
-//    public AppInfo(Context context, AppInfoBean bean) {
-//        this.appName = bean.getAppName();
-//        this.packageName = bean.getPackageName();
-//        this.valuePairList = bean.getValuePairList();
-//
-//        String drawableString = bean.getDrawable();
-//        if (drawableString != null || !drawableString.equals("") || !drawableString.equals("null")) {
-//            drawable = Utils.getDrawableFromFile(drawableString);
-//        } else if (!TextUtils.isEmpty("packageName")) {
-//            drawable = Utils.getAppDrawableIcon(context, packageName);
-//        }
-//
-//    }
-//
-//    public static List<AppInfo> fromAppInfoBeans(Context context, List<AppInfoBean> appInfoBeans){
-//        List<AppInfo> appInfos = new ArrayList<>();
-//        for (AppInfoBean bean:appInfoBeans){
-//            appInfos.add(new AppInfo(context, bean));
-//        }
-//
-//        return appInfos;
-//    }
-//
-//    public static AppInfoBean toAppInfoBean(){
-//
-//    }
+
 }

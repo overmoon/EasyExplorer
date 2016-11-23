@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">EasyExplorer</string>
     <string name="add_dialog_title">添加</string>
-    <string name="add_dialog_tag_hint">标签， tag</string>
-    <string name="add_dialog_path_hint">全路径</string>
+    <string name="add_dialog_tag_hint">标签</string>
+    <string name="add_dialog_path_hint">文件夹路径</string>
     <string name="cancel_string">取 消</string>
     <string name="confirm_string">确 定</string>
+    <string name="edit_subItem_string">编辑</string>
+    <string name="delete_string">删 除</string>
 </resources>

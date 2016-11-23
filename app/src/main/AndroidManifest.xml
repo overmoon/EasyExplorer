@@ -22,6 +22,9 @@
         <activity
             android:name=".ui.activity.DialogActivity"
             android:theme="@style/DialogActivity.Blue" />
+        <activity
+            android:name=".ui.activity.EditDialogActivity"
+            android:theme="@style/DialogActivity.Blue" />
     </application>
 
 </manifest>

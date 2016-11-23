@@ -4,11 +4,13 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 
+import java.io.Serializable;
+
 /**
  * Created by admin on 2016/11/8.
  */
 
-public class ValuePair<T, V> {
+public class ValuePair<T, V> implements Serializable {
     @Expose
     T name;
     @Expose

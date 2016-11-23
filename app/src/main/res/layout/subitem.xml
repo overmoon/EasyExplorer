@@ -2,8 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="5dp"
     android:background="@drawable/tblue_subitem_selector"
-    android:clipChildren="true"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -24,27 +24,6 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:textSize="@dimen/smallTextSize" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/edit_linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|center_vertical"
-        android:layout_marginRight="-60dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@mipmap/edit" />
-
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@mipmap/del" />
-
     </LinearLayout>
 
 </FrameLayout>

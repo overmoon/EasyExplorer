@@ -66,13 +66,70 @@ public class JsonUtils {
             appInfos = new ArrayList<>();
             appInfos.add(appInfoGlobal);
         }
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-        String json = gson.toJson(appInfos);
-        //json写入文件
-        File file = getDataFile(context, DEFAULT_FILE_NAME);
-        writeToFile(json, file);
+        saveAppInfos(context, appInfos);
         return true;
+    }
+
+    //修改appInfo
+    public static boolean changeAppInfo(Context context, AppInfo appInfo, int position) throws IOException {
+        List<AppInfo> appInfos = getAppInfos(context, DEFAULT_FILE_NAME);
+        AppInfo info = null;
+        //查找appName, packageName对应的appInfo
+        boolean hasItem = false; //判断是否存在
+        for (AppInfo tmpInfo : appInfos) {
+            if (tmpInfo.getAppName().equals(appInfo.getAppName())) {
+                if (tmpInfo.getPackageName() != null && tmpInfo.getPackageName().equals(appInfo.getPackageName())
+                        || tmpInfo.getPackageName() == appInfo.getPackageName()) {
+                    info = tmpInfo;
+                    hasItem = true;
+                    break;
+                }
+            }
+        }
+        // 不存在此appInfo
+        if (!hasItem) {
+            return false;
+        }
+        //对appInfo的valuePair处理
+        //valuePair被删除，且size大于删除的位置
+        if (appInfo.getValuePairList().size() == 0 && position != -1 && info.getValuePairList().size() > position) {
+            info.getValuePairList().remove(position);
+            return saveAppInfos(context, appInfos);
+        } else if (appInfo.getValuePairList().size() > 0) {
+            if (position != -1) {
+                //valuePair被修改
+                info.getValuePairList().remove(position);
+                info.getValuePairList().add(position, appInfo.getValuePairList().get(0));
+            } else {
+                //position=-1，则添加valuePair
+                info.getValuePairList().add(appInfo.getValuePairList().get(0));
+            }
+            return saveAppInfos(context, appInfos);
+        }
+        return false;
+    }
+
+    public static boolean deleteAppInfo(Context context, AppInfo appInfo) throws IOException {
+        List<AppInfo> appInfos = getAppInfos(context, DEFAULT_FILE_NAME);
+        if (appInfos != null) {
+            String appName = appInfo.getAppName();
+            String packageName = appInfo.getPackageName();
+
+            for (AppInfo tmpInfo : appInfos) {
+                //判断是否已经有相同的应用
+                if (tmpInfo.getAppName().equals(appName)) {
+                    if (packageName != null && packageName.equals(tmpInfo.getPackageName())
+                            || tmpInfo.getPackageName() == packageName) {
+                        appInfos.remove(tmpInfo);
+                        break;
+                    }
+                }
+            }
+            saveAppInfos(context, appInfos);
+            return true;
+        }
+        return false;
     }
 
     //从文件中获取appInfo list
@@ -98,9 +155,27 @@ public class JsonUtils {
         return appInfos;
     }
 
+    //保存AppInfo列表到Json文件
+    private static boolean saveAppInfos(Context context, List<AppInfo> appInfos) {
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        String json = gson.toJson(appInfos);
+        //json写入文件
+        File file = null;
+        try {
+            file = getDataFile(context, DEFAULT_FILE_NAME);
+            writeToFile(json, file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
     //写入数据
     public static void writeToFile(String json, File file) throws IOException {
-        FileOutputStream out = out = new FileOutputStream(file);
+        //覆盖源文件
+        FileOutputStream out = out = new FileOutputStream(file, false);
         out.write(json.getBytes());
         if (out != null) {
             out.close();
