@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -33,6 +35,8 @@ public class MainActivity extends BaseActivity {
     private List<AppInfo> appInfos;
     private MainRecyclerListAdapter adapter;
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private AsyncTask dataTask;
 
     protected void initVariables() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -70,40 +74,61 @@ public class MainActivity extends BaseActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        //改变加载显示的颜色
+        swipeRefreshLayout.setColorSchemeColors(Color.RED, Color.GRAY);
+        //设置背景颜色
+//        swipeRefreshLayout.setBackgroundColor(Color.YELLOW);
+        //设置初始时的大小
+        swipeRefreshLayout.setSize(SwipeRefreshLayout.DEFAULT);
+        //设置向下拉多少出现刷新
+        swipeRefreshLayout.setDistanceToTriggerSync(100);
+        //设置刷新出现的位置
+        swipeRefreshLayout.setProgressViewEndTarget(true, 200);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadData();
+            }
+        });
     }
 
     @Override
     protected void loadData() {
-
-    }
-
-    protected void loadDatas() {
         adapterDataList.clear();
         adapterDataList.addAll(getMountedPoints(this));
         adapterDataList.add(new Object());
-        new AsyncTask<Context, Void, List>() {
-            @Override
-            protected List doInBackground(Context[] params) {
-                List<AppInfo> infos = null;
-                try {
-                    infos = JsonUtils.getAppInfos(params[0], null);
-                    infos = getAppDrawable(params[0], infos);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return infos;
-            }
 
-            @Override
-            protected void onPostExecute(List appInfos) {
-                if (appInfos != null) {
-                    adapterDataList.addAll(adapterDataList.size() - 1, appInfos);
+        //如果执行完了，则重新执行
+        if (dataTask == null || dataTask.getStatus() == AsyncTask.Status.FINISHED) {
+            dataTask = new AsyncTask<Context, Void, List>() {
+                @Override
+                protected List doInBackground(Context[] params) {
+                    List<AppInfo> infos = null;
+                    try {
+                        infos = JsonUtils.getAppInfos(params[0], null);
+                        infos = getAppDrawable(params[0], infos);
+                        Thread.sleep(500);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return infos;
+                }
+
+                @Override
+                protected void onPostExecute(List appInfos) {
+                    if (appInfos != null) {
+                        adapterDataList.addAll(adapterDataList.size() - 1, appInfos);
+                    }
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
                     adapter.notifyDataSetChanged();
                 }
-            }
-        }.execute(this);
-
-        adapter.notifyDataSetChanged();
+            }.execute(this);
+        }
     }
 
     //获取appinfo的drawable
@@ -138,7 +163,35 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
+        System.out.println("onResume");
         super.onResume();
-        loadDatas();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        System.out.println("onPause");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        System.out.println("onStart");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case Utils.REQUEST_ADD:
+                if (resultCode == RESULT_OK) {
+                    loadData();
+                }
+                break;
+            case Utils.REQUEST_MODIFY:
+                if (resultCode == RESULT_OK) {
+                    loadData();
+                }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

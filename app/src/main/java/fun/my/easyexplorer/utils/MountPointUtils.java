@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.os.storage.StorageManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -19,8 +18,8 @@ import fun.my.easyexplorer.model.MountPoint;
  * Created by admin on 2016/9/10.
  */
 public class MountPointUtils {
-    private Context context;
     private final static String tag = "MountPointUtils";
+    private Context context;
 
     /**
      * 构造方法
@@ -45,7 +44,7 @@ public class MountPointUtils {
      * 核心操作-获取所有挂载点信息。
      */
     public List<MountPoint> getMountPoint() {
-        try{
+        try {
             Class class_StorageManager = StorageManager.class;
             Method method_getVolumeList = class_StorageManager.getMethod("getVolumeList");
             Method method_getVolumeState = class_StorageManager.getMethod("getVolumeState", String.class);
@@ -62,7 +61,7 @@ public class MountPointUtils {
             //region 所有挂载点File---附带是内置存储卡还是外置存储卡的标志
             Object[] objArray = (Object[]) method_getVolumeList.invoke(sm);
             List<MountPoint> result = new ArrayList<>();
-            for (Object value:objArray){
+            for (Object value : objArray) {
                 String path = (String) method_getPath.invoke(value);
                 File file;
                 // if(Build.VERSION.SDK_INT >=17), file = (File) method_getPathFile.invoke(value);
@@ -82,16 +81,13 @@ public class MountPointUtils {
             }
             return result;
             //endregion
-        }catch(NoSuchMethodException e){
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
-        }
-        catch(InvocationTargetException e){
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
-        }
-        catch(IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
-        catch(ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;
@@ -102,11 +98,28 @@ public class MountPointUtils {
      */
     public List<MountPoint> getMountedPoint() {
         List<MountPoint> result = getMountPoint();
-        for(MountPoint value: result){
-            if(!value.isMounted()) {
+        for (MountPoint value : result) {
+            if (!value.isMounted()) {
                 result.remove(value);
             }
         }
         return result;
     }
+
+    //获取内存路径，如果有sdcard则返回sdcard路径，否则返回内部存储路径
+    public String getMemPath() {
+        List<MountPoint> list = getMountedPoint();
+        if (list.size() > 0) {
+            MountPoint result = null;
+            for (MountPoint mountPoint : list) {
+                result = mountPoint;
+                if (result.isSDcard()) {
+                    return result.getFile().getAbsolutePath();
+                }
+            }
+            return result.getFile().getAbsolutePath();
+        }
+        return null;
+    }
+
 }

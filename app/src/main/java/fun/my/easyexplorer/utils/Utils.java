@@ -33,6 +33,8 @@ import my.fun.asyncload.imageloader.utils.BitmapUtils;
 public class Utils {
     public final static int REQUEST_IMAGE = 0;
     public final static int REQUEST_PATH = 1;
+    public final static int REQUEST_ADD = 2;
+    public final static int REQUEST_MODIFY = 3;
     public final static int SHORT = Toast.LENGTH_SHORT;
     public final static int LONG = Toast.LENGTH_LONG;
     public static final int FILTER_ALL_APP = 0; // 所有应用程序

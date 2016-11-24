@@ -22,7 +22,8 @@
         android:background="@null"
         android:hint="@string/add_dialog_tag_hint"
         android:maxLength="20"
-        android:padding="@dimen/main_recycleItem_padding" />
+        android:padding="@dimen/main_recycleItem_padding"
+        android:textSize="@dimen/midTextSize" />
 
     <View
         android:id="@+id/dialog_divider2"
@@ -49,10 +50,10 @@
             android:layout_weight="1"
             android:background="@null"
             android:hint="@string/add_dialog_path_hint"
-            android:maxLength="100"
             android:paddingBottom="@dimen/main_recycleItem_padding"
             android:paddingLeft="@dimen/main_recycleItem_padding"
-            android:paddingTop="@dimen/main_recycleItem_padding" />
+            android:paddingTop="@dimen/main_recycleItem_padding"
+            android:textSize="@dimen/smallTextSize" />
 
         <ImageView
             android:id="@+id/path_dialog_imageView"

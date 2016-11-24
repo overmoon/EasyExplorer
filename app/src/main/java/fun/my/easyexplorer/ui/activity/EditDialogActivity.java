@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -17,6 +18,7 @@ import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.ValuePair;
 import fun.my.easyexplorer.utils.JsonUtils;
+import fun.my.easyexplorer.utils.MountPointUtils;
 import fun.my.easyexplorer.utils.Utils;
 
 /**
@@ -78,10 +80,7 @@ public class EditDialogActivity extends BaseActivity {
         path_dialog_imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(EditDialogActivity.this, FileExplorerActivity.class);
-                intent.putExtra("isDir", true);
-                intent.putExtra("path", (String) valuePair.getValue());
-                startActivityForResult(intent, Utils.REQUEST_PATH);
+                startFileActivityForResult(context);
             }
         });
         Button cancelButton = (Button) findViewById(R.id.cancelButton);
@@ -117,10 +116,11 @@ public class EditDialogActivity extends BaseActivity {
                     protected void onPostExecute(Boolean aBoolean) {
                         Context ctx = EditDialogActivity.this.getApplicationContext();
                         if (aBoolean) {
-                            Utils.messageShort(ctx, "保存成功");
+                            Utils.messageShort(ctx, "修改成功");
+                            setResult(RESULT_OK);
                             finish();
                         } else {
-                            Utils.messageShort(ctx, "保存失败");
+                            Utils.messageShort(ctx, "修改失败");
                         }
                     }
                 }.execute();
@@ -147,16 +147,30 @@ public class EditDialogActivity extends BaseActivity {
                     protected void onPostExecute(Boolean aBoolean) {
                         Context ctx = EditDialogActivity.this.getApplicationContext();
                         if (aBoolean) {
-                            Utils.messageShort(ctx, "保存成功");
+                            Utils.messageShort(ctx, "删除成功");
+                            setResult(RESULT_OK);
                             finish();
                         } else {
-                            Utils.messageShort(ctx, "保存失败");
+                            Utils.messageShort(ctx, "删除成功");
                         }
                     }
                 }.execute();
             }
         });
 
+    }
+
+    //打开路径选择activity
+    private void startFileActivityForResult(Context context) {
+        //如果有路径且存在，则打开原来设置的路径
+        String path = valuePair.getValue();
+        if (TextUtils.isEmpty(path) || !new File(path).isDirectory()) {
+            path = MountPointUtils.GetMountPointInstance(context).getMemPath();
+        }
+        Intent intent = new Intent(context, FileExplorerActivity.class);
+        intent.putExtra("isDir", true);
+        intent.putExtra("path", path);
+        startActivityForResult(intent, Utils.REQUEST_PATH);
     }
 
     @Override
@@ -166,6 +180,7 @@ public class EditDialogActivity extends BaseActivity {
                 String path = data.getStringExtra("path");
                 path_dialog_editTextView.setText(path);
                 path_dialog_editTextView.setSelection(path.length());
+                valuePair.setValue(path);
             }
         }
     }

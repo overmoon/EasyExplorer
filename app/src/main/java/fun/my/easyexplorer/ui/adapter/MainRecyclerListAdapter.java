@@ -35,7 +35,7 @@ import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.MountPoint;
 import fun.my.easyexplorer.model.ValuePair;
-import fun.my.easyexplorer.ui.activity.DialogActivity;
+import fun.my.easyexplorer.ui.activity.AddDialogActivity;
 import fun.my.easyexplorer.ui.activity.EditDialogActivity;
 import fun.my.easyexplorer.ui.activity.FileExplorerActivity;
 import fun.my.easyexplorer.ui.view.CustomCircleView;
@@ -165,7 +165,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showAddDialog(context);
+                    startAddDialogForResult(context);
                 }
             });
         }
@@ -204,10 +204,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         addImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, EditDialogActivity.class);
-                intent.putExtra("appName", appInfo.getAppName());
-                intent.putExtra("packageName", appInfo.getPackageName());
-                ((Activity) context).startActivity(intent);
+                startEditDialogForResult(context, v, appInfo, -1);
             }
         });
         //删除项目按钮监听事件
@@ -298,17 +295,12 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
                     }
                 });
                 //设置子view的长按事件
-                final int posiiton = i;
+                final int position = i;
                 view.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        ValuePair valuePair = (ValuePair) v.getTag();
-                        Intent intent = new Intent(context, EditDialogActivity.class);
-                        intent.putExtra("appName", appInfo.getAppName());
-                        intent.putExtra("packageName", appInfo.getPackageName());
-                        intent.putExtra("valuePair", valuePair);
-                        intent.putExtra("position", posiiton);
-                        ((Activity) context).startActivityForResult(intent, -1);
+                        startEditDialogForResult(context, v, appInfo, position);
+
                         return true;
                     }
                 });
@@ -328,6 +320,7 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
             }
         }
     }
+
 
     // subitem的touch事件，判断是否滑动
     private boolean onTouchSubItem(View v, MotionEvent event) {
@@ -380,12 +373,19 @@ public class MainRecyclerListAdapter extends RecyclerView.Adapter<RecyclerListVi
         this.itemLongClickedListener = itemLongClickedListener;
     }
 
-    private void showAddDialog(Context context) {
-        Intent intent = new Intent(context, DialogActivity.class);
-        ((Activity) context).startActivity(intent);
-//        initViews(context);
-//        dialog.show();
-//        listPopupWindow.show();
+    private void startAddDialogForResult(Context context) {
+        Intent intent = new Intent(context, AddDialogActivity.class);
+        ((Activity) context).startActivityForResult(intent, Utils.REQUEST_ADD);
+    }
+
+    private void startEditDialogForResult(Context context, View v, AppInfo appInfo, int position) {
+        ValuePair valuePair = (ValuePair) v.getTag();
+        Intent intent = new Intent(context, EditDialogActivity.class);
+        intent.putExtra("appName", appInfo.getAppName());
+        intent.putExtra("packageName", appInfo.getPackageName());
+        intent.putExtra("valuePair", valuePair);
+        intent.putExtra("position", position);
+        ((Activity) context).startActivityForResult(intent, Utils.REQUEST_MODIFY);
     }
 
     private void initViews(Context context) {

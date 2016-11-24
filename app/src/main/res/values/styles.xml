@@ -45,7 +45,10 @@
         <item name="myColorDivider">@color/colorDivider_blue_gray</item>
     </style>
 
-    <style name="DialogActivity" parent="Base.Theme.AppCompat.Dialog"></style>
+    <style name="DialogActivity" parent="Base.Theme.AppCompat.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 
     <style name="DialogActivity.Blue">
         <item name="myColorPrimaryLight">@color/colorPrimaryLight_blue</item>

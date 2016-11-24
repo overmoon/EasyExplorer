@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.ListPopupWindow;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,6 +26,7 @@ import fun.my.easyexplorer.model.AppInfo;
 import fun.my.easyexplorer.model.ValuePair;
 import fun.my.easyexplorer.ui.adapter.ListPopupAdapter;
 import fun.my.easyexplorer.utils.JsonUtils;
+import fun.my.easyexplorer.utils.MountPointUtils;
 import fun.my.easyexplorer.utils.UriUtils;
 import fun.my.easyexplorer.utils.Utils;
 
@@ -32,10 +34,7 @@ import fun.my.easyexplorer.utils.Utils;
  * Created by admin on 2016/11/11.
  */
 
-public class DialogActivity extends BaseActivity {
-    private final static int REQUEST_IMAGE = 0;
-    private final static int REQUEST_PATH = 1;
-
+public class AddDialogActivity extends BaseActivity {
     private ListPopupWindow listPopupWindow;
     private ListPopupAdapter popupAdapter;
     private EditText appName_editText, tag_dialog_editTextView, path_dialog_editTextView;
@@ -144,9 +143,7 @@ public class DialogActivity extends BaseActivity {
         path_dialog_imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DialogActivity.this, FileExplorerActivity.class);
-                intent.putExtra("isDir", true);
-                startActivityForResult(intent, REQUEST_PATH);
+                startFileActivityForResult(context);
             }
         });
         //auto text监听
@@ -212,43 +209,67 @@ public class DialogActivity extends BaseActivity {
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                appInfoGlobal.setAppName(appName_editText.getText().toString());
-                //获取<tag, path>
-                valuePairGlobal.setName(tag_dialog_editTextView.getText().toString());
-                valuePairGlobal.setValue(path_dialog_editTextView.getText().toString());
-                //设置appInfo的list
-                appInfoGlobal.setValuePairList(new ArrayList<ValuePair>() {
-                    {
-                        add(valuePairGlobal);
-                    }
-                });
-                //异步保存
-                new AsyncTask<Void, Void, Boolean>() {
-                    @Override
-                    protected Boolean doInBackground(Void... params) {
-                        try {
-                            return JsonUtils.saveAppInfo(DialogActivity.this, appInfoGlobal);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return false;
+                String tag = tag_dialog_editTextView.getText().toString();
+                String path = path_dialog_editTextView.getText().toString();
+                if (checkVariables(context, tag, path)) {
+                    appInfoGlobal.setAppName(appName_editText.getText().toString());
+                    //获取<tag, path>
+                    valuePairGlobal.setName(tag);
+                    valuePairGlobal.setValue(path);
+                    //设置appInfo的list
+                    appInfoGlobal.setValuePairList(new ArrayList<ValuePair>() {
+                        {
+                            add(valuePairGlobal);
                         }
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean aBoolean) {
-                        Context ctx = DialogActivity.this.getApplicationContext();
-                        if (aBoolean) {
-                            Utils.messageShort(ctx, "保存成功");
-                            finish();
-                        } else {
-                            Utils.messageShort(ctx, "保存失败");
+                    });
+                    //异步保存
+                    new AsyncTask<Void, Void, Boolean>() {
+                        @Override
+                        protected Boolean doInBackground(Void... params) {
+                            try {
+                                return JsonUtils.saveAppInfo(AddDialogActivity.this, appInfoGlobal);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                return false;
+                            }
                         }
-                    }
-                }.execute();
 
+                        @Override
+                        protected void onPostExecute(Boolean aBoolean) {
+                            Context ctx = AddDialogActivity.this.getApplicationContext();
+                            if (aBoolean) {
+                                Utils.messageShort(ctx, "保存成功");
+                                setResult(RESULT_OK);
+                                finish();
+                            } else {
+                                Utils.messageShort(ctx, "保存失败");
+                            }
+                        }
+                    }.execute();
+                }
             }
         });
+    }
 
+    private void startFileActivityForResult(Context context) {
+        String path = MountPointUtils.GetMountPointInstance(context).getMemPath();
+        Intent intent = new Intent(context, FileExplorerActivity.class);
+        intent.putExtra("isDir", true);
+        intent.putExtra("path", path);
+        startActivityForResult(intent, Utils.REQUEST_PATH);
+    }
+
+    //检查变量是否合格
+    private boolean checkVariables(Context context, String tag, String path) {
+        if (TextUtils.isEmpty(tag)) {
+            Utils.messageShort(context, "标签不能空");
+            return false;
+        }
+        if (TextUtils.isEmpty(path)) {
+            Utils.messageShort(context, "路径不能空");
+            return false;
+        }
+        return true;
     }
 
     //打开图片选择窗口
@@ -256,7 +277,7 @@ public class DialogActivity extends BaseActivity {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);//ACTION_OPEN_DOCUMENT
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/jpeg");
-        startActivityForResult(intent, REQUEST_IMAGE);
+        startActivityForResult(intent, Utils.REQUEST_IMAGE);
     }
 
     void listPopupWindowShow() {
@@ -277,14 +298,14 @@ public class DialogActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE) {
+        if (requestCode == Utils.REQUEST_IMAGE) {
             if (data != null) {
                 Uri uri = data.getData();
                 String path = UriUtils.getPath(this, uri);
                 dialog_imageView.setImageDrawable(Utils.getDrawableFromFile(path));
                 appInfoGlobal.setDrawableFile(path);
             }
-        } else if (requestCode == REQUEST_PATH) {
+        } else if (requestCode == Utils.REQUEST_PATH) {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra("path");
                 path_dialog_editTextView.setText(path);
