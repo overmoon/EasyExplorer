@@ -83,6 +83,10 @@ public class ListPopupAdapter extends BaseAdapter implements Filterable {
         this.appFilter = filter;
     }
 
+    public void setOriginalData(List originalData) {
+        this.originalInfos = originalData;
+    }
+
     class AppFilter extends Filter {
 
         @Override

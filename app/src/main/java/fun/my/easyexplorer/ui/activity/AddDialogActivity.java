@@ -74,6 +74,7 @@ public class AddDialogActivity extends BaseActivity {
             protected void onPostExecute(List o) {
                 appInfos.clear();
                 appInfos.addAll(o);
+                popupAdapter.setOriginalData(o);
                 popupAdapter.notifyDataSetChanged();
             }
         }.execute(this);

@@ -49,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@null"
+            android:gravity="center_vertical"
             android:hint="@string/add_dialog_path_hint"
             android:paddingBottom="@dimen/main_recycleItem_padding"
             android:paddingLeft="@dimen/main_recycleItem_padding"
@@ -60,7 +61,7 @@
             android:layout_width="@dimen/imageViewSize_mid"
             android:layout_height="@dimen/imageViewSize_mid"
             android:layout_gravity="top"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:background="@mipmap/openfolder"
             android:clickable="true" />
 

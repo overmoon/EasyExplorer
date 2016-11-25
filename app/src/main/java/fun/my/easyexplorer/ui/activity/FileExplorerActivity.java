@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 import fun.my.easyexplorer.R;
 import fun.my.easyexplorer.model.Frame;
@@ -48,29 +50,31 @@ public class FileExplorerActivity extends BaseActivity {
     //当前文件列表
     private List<File> currentFileList;
     //打开文件顺序
-    private ArrayList<Frame> cacheList;
+    private ArrayList<File> cacheList;
+    private Stack<Frame> fileStack;
+
     private boolean isDir;
     private LinearLayout buttonLayout;
 
     @Override
     protected void initVariables() {
-        cacheList = new ArrayList();
+        //缓存文件点击
+        fileStack = new Stack<>();
+        cacheList = new ArrayList<>();
         String path = getIntent().getStringExtra("path");
         isDir = getIntent().getBooleanExtra("isDir", false);
         File currentFile;
-        if (path != null && !path.equals("")) {
+        if (!TextUtils.isEmpty(path)) {
             currentFile = new File(path);
-            cacheList.addAll(getParentsFiles(currentFile));
         } else {
             currentFile = new File(File.separator);
         }
-
-        cacheList.add(new Frame(currentFile, new Point()));
+        // 添加当前文件
+        fileStack.add(new Frame(currentFile, new Point()));
         currentFileList = new ArrayList<>();
         scrollPosition = childTop = 0;
         //file list adapter
         fileListAdapter = new FileListAdapter(FileExplorerActivity.this, currentFileList);
-
         //路径栏
         recyclerListAdapter = new RecyclerListAdapter(cacheList);
     }
@@ -100,13 +104,13 @@ public class FileExplorerActivity extends BaseActivity {
             public void onClick(View v) {
                 Intent intent = new Intent();
                 //获取当前路径
-                String path = cacheList.get(cacheList.size() - 1).getFile().getAbsolutePath();
+                String path = fileStack.peek().getFile().getAbsolutePath();
                 intent.putExtra("path", path);
                 setResult(RESULT_OK, intent);
                 finish();
             }
         });
-        //filelist init
+        //fileList init
         file_ListView = (ListView) findViewById(R.id.file_listView);
         file_ListView.setAdapter(fileListAdapter);
         file_ListView.setItemsCanFocus(true);
@@ -142,10 +146,10 @@ public class FileExplorerActivity extends BaseActivity {
         recyclerListAdapter.setOnItemClickListener(new RecyclerListAdapter.OnItemClickListener() {
                                                        @Override
                                                        public void onItemClick(View view, int position) {
-                                                           int size = cacheList.size();
-                                                           for (int i = size - 1; i > position; i--) {
-                                                               cacheList.remove(i);
-                                                           }
+                                                           File f = cacheList.get(position);
+                                                           //压入栈中
+                                                           fileStack.push(new Frame(f, new Point()));
+                                                           //cacheList重新赋值
                                                            loadData();
                                                        }
                                                    }
@@ -155,20 +159,21 @@ public class FileExplorerActivity extends BaseActivity {
 
     @Override
     protected void loadData() {
-        int size = cacheList.size();
+        cacheList.clear();
+        cacheList.addAll(getParentFilesIncludingSelf(fileStack.peek().getFile()));
         //加载路径栏
         loadPathView(cacheList);
         //加载file list
-        loadFileListView(cacheList.get(size - 1));
-
+        loadFileListView(fileStack.peek());
     }
 
-    //获取父文件列表
-    private ArrayList<Frame> getParentsFiles(File currentFile) {
-        ArrayList<Frame> list = new ArrayList();
+    //获取父文件列表包括自己
+    private ArrayList<File> getParentFilesIncludingSelf(File currentFile) {
+        ArrayList<File> list = new ArrayList();
+        list.add(currentFile);
         File f = currentFile;
         while ((f = f.getParentFile()) != null) {
-            list.add(0, new Frame(f, new Point()));
+            list.add(0, f);
         }
         return list;
     }
@@ -208,6 +213,14 @@ public class FileExplorerActivity extends BaseActivity {
         openMimeType(f, mimeType);
     }
 
+    private void openDir(File f) {
+        //缓存列表位置
+        fileStack.peek().getPoint().set(scrollPosition, childTop);
+        //添加文件
+        fileStack.push(new Frame(f, new Point()));
+        loadData();
+    }
+
     void openMimeType(File f, String mimeType) {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -240,14 +253,6 @@ public class FileExplorerActivity extends BaseActivity {
         WindowManager.LayoutParams lp = alertDialog.getWindow().getAttributes();
         lp.width = (int) (Utils.getWindowWidth(this) * 0.9);
         alertDialog.getWindow().setAttributes(lp);
-    }
-
-    private void openDir(File f) {
-        //缓存列表位置
-        cacheList.get(cacheList.size() - 1).getPoint().set(scrollPosition, childTop);
-        //添加文件
-        cacheList.add(new Frame(f, new Point()));
-        loadData();
     }
 
     private List<String> parsePath(File file) {
@@ -302,11 +307,11 @@ public class FileExplorerActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        int size = cacheList.size();
+        int size = fileStack.size();
         if (size <= 1) {
             super.onBackPressed();
         } else {
-            cacheList.remove(cacheList.size() - 1);
+            fileStack.pop();
             loadData();
         }
     }

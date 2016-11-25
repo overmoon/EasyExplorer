@@ -14,11 +14,11 @@
 
     <ImageView
         android:id="@+id/appIcon_dialog_imageView"
-        android:layout_width="@dimen/dialog_heightSize"
-        android:layout_height="@dimen/dialog_heightSize"
+        android:layout_width="@dimen/imageViewSize"
+        android:layout_height="@dimen/imageViewSize"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/dialogTitle_textView"
-        android:layout_margin="10dp" />
+        android:layout_margin="5dp" />
 
     <LinearLayout
         android:id="@+id/appName_linearLayout"
@@ -26,8 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/dialogTitle_textView"
         android:layout_marginBottom="0dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
         android:layout_toRightOf="@+id/appIcon_dialog_imageView"
         android:orientation="horizontal">
 
@@ -48,7 +48,7 @@
             android:layout_width="@dimen/imageViewSize_mid"
             android:layout_height="@dimen/imageViewSize_mid"
             android:layout_gravity="top"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:background="@drawable/popdown_selector"
             android:clickable="true" />
 
@@ -100,6 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@null"
+            android:gravity="center_vertical"
             android:hint="@string/add_dialog_path_hint"
             android:paddingBottom="@dimen/main_recycleItem_padding"
             android:paddingLeft="@dimen/main_recycleItem_padding"
@@ -111,7 +112,7 @@
             android:layout_width="@dimen/imageViewSize_mid"
             android:layout_height="@dimen/imageViewSize_mid"
             android:layout_gravity="top"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:background="@mipmap/openfolder"
             android:clickable="true" />
 

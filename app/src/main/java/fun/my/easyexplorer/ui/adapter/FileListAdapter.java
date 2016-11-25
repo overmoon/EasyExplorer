@@ -5,11 +5,15 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import fun.my.easyexplorer.R;
@@ -25,24 +29,29 @@ public class FileListAdapter extends BaseAdapter {
     protected LayoutInflater inflater;
     protected List<File> files;
     protected int layout_ID;
+    private List<Boolean> isCheckList;
     private Context context;
+    private boolean isEdit;
+    private Animation animation;
 
     public FileListAdapter(Context context, List<File> files) {
         this.context = context;
         inflater = LayoutInflater.from(context);
         this.files = files;
+        initCheckList(files);
         layout_ID = R.layout.fileexplorer_listitem;
+        isEdit = true;
+        initCheckBoxAnimation();
     }
 
+
     public FileListAdapter(Context context, List<File> files, int layout_ID) {
-        context = context.getApplicationContext();
-        inflater = LayoutInflater.from(context);
-        this.files = files;
+        this(context, files);
         this.layout_ID = layout_ID;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         FileViewHolder fileViewHolder;
         if (convertView != null) {
             fileViewHolder = (FileViewHolder) convertView.getTag();
@@ -51,6 +60,7 @@ public class FileListAdapter extends BaseAdapter {
             convertView = inflater.inflate(layout_ID, null);
             fileViewHolder.fileIcon_ImageView = (ImageView) convertView.findViewById(R.id.file_icon);
             fileViewHolder.fileName_TextView = (TextView) convertView.findViewById(R.id.file_name);
+            fileViewHolder.file_checkBox = (CheckBox) convertView.findViewById(R.id.file_checkbox);
             convertView.setTag(fileViewHolder);
         }
 
@@ -64,10 +74,25 @@ public class FileListAdapter extends BaseAdapter {
 
         //set file name
         fileViewHolder.fileName_TextView.setText(file.getName());
-
+        //set checkbox
+        fileViewHolder.file_checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isCheckList.set(position, ((CheckBox) v).isChecked());
+            }
+        });
+        if (!isEdit) {
+            fileViewHolder.file_checkBox.setVisibility(View.GONE);
+        } else {
+            fileViewHolder.file_checkBox.setVisibility(View.VISIBLE);
+            fileViewHolder.file_checkBox.isChecked();
+//            fileViewHolder.file_checkBox.startAnimation(animation);
+            fileViewHolder.file_checkBox.setChecked(isCheckList.get(position));
+        }
         return convertView;
     }
 
+    //设置文件图标
     private void setFileIcon(ImageView fileIcon_imageView, File file) {
         String mimeType = Utils.getMimeType(file);
         FileType f = FileType.mimeTypeOf(mimeType);
@@ -99,6 +124,7 @@ public class FileListAdapter extends BaseAdapter {
         }
     }
 
+    //设置文件夹图标
     private void setFolderIcon(ImageView fileIcon_imageView, File file) {
         int icon_id = 0;
         if (file.list() == null || file.list().length == 0) {
@@ -132,8 +158,29 @@ public class FileListAdapter extends BaseAdapter {
         this.layout_ID = layout_ID;
     }
 
+    @Override
+    public void notifyDataSetChanged() {
+        initCheckList(files);
+        super.notifyDataSetChanged();
+    }
+
+    private void initCheckBoxAnimation() {
+        //淡入动画
+        animation = new AlphaAnimation(0f, 1f);
+        //持续时间
+        animation.setDuration(500);
+    }
+
+    private void initCheckList(List<File> files) {
+        isCheckList = new ArrayList();
+        for (int i = 0; i < files.size(); i++) {
+            isCheckList.add(false);
+        }
+    }
+
     private class FileViewHolder {
         TextView fileName_TextView;
         ImageView fileIcon_ImageView;
+        CheckBox file_checkBox;
     }
 }

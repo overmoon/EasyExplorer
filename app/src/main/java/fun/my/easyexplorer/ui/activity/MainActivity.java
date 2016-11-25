@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -75,8 +74,15 @@ public class MainActivity extends BaseActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        Utils.getThemeAttrColor(this, R.attr.myColorPrimary);
+        Utils.getThemeAttrColor(this, R.attr.myColorPrimaryLight);
+        Utils.getThemeAttrColor(this, R.attr.myColorPrimaryDark);
         //改变加载显示的颜色
-        swipeRefreshLayout.setColorSchemeColors(Color.RED, Color.GRAY);
+        swipeRefreshLayout.setColorSchemeColors(
+                Utils.getThemeAttrColor(this, R.attr.myColorPrimaryLight),
+                Utils.getThemeAttrColor(this, R.attr.myColorPrimary),
+                Utils.getThemeAttrColor(this, R.attr.myColorPrimaryDark)
+        );
         //设置背景颜色
 //        swipeRefreshLayout.setBackgroundColor(Color.YELLOW);
         //设置初始时的大小
@@ -108,7 +114,7 @@ public class MainActivity extends BaseActivity {
                     try {
                         infos = JsonUtils.getAppInfos(params[0], null);
                         infos = getAppDrawable(params[0], infos);
-                        Thread.sleep(500);
+                        Thread.sleep(1000);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
