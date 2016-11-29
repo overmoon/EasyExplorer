@@ -38,13 +38,13 @@
         android:id="@+id/file_listView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@+id/buttonLinearLayout"
+        android:layout_above="@+id/edit_toolbar"
         android:layout_below="@id/bottom_board"
         android:paddingLeft="10dp"
         android:paddingRight="10dp" />
 
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:id="@+id/buttonLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,5 +64,88 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/confirm_string" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="3dp"
+            android:drawableTop="@mipmap/edit"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="复制"
+            android:textSize="@dimen/smallTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="3dp"
+            android:drawableTop="@mipmap/edit"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="移动"
+            android:textSize="@dimen/smallTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="3dp"
+            android:drawableTop="@mipmap/edit"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="删除"
+            android:textSize="@dimen/smallTextSize" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawablePadding="3dp"
+            android:drawableTop="@mipmap/edit"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="更多"
+            android:textSize="@dimen/smallTextSize" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit2_linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableTop="@mipmap/edit" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableTop="@mipmap/edit" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableTop="@mipmap/edit" />
+
     </LinearLayout>
 </RelativeLayout>

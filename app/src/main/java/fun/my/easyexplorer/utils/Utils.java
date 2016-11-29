@@ -18,6 +18,8 @@ import android.util.TypedValue;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -562,10 +564,33 @@ public class Utils {
 
     public static String getMimeType(File f) {
         String fileName = f.getName();
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String extension = getFileExtension(fileName);
         String mimeType = MIME_MapTable.get(extension);
 
         return mimeType;
+    }
+
+    public static String getFileExtension(String name) {
+        int index = name.lastIndexOf(".");
+        if (index == -1)
+            return "";
+        return name.substring(index + 1);
+    }
+
+    public static long getFileSize(File file) throws IOException {
+        long size = 0;
+        if (file.exists()) {
+            FileInputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+                size = inputStream.available();
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+        }
+        return size;
     }
 
     public static int getWindowWidth(Context context) {

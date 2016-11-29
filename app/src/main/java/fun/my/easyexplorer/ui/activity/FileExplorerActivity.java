@@ -25,6 +25,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -33,6 +34,7 @@ import fun.my.easyexplorer.model.Frame;
 import fun.my.easyexplorer.ui.FileDividerItemDecoration;
 import fun.my.easyexplorer.ui.adapter.FileListAdapter;
 import fun.my.easyexplorer.ui.adapter.RecyclerListAdapter;
+import fun.my.easyexplorer.utils.FileComparator;
 import fun.my.easyexplorer.utils.Utils;
 
 /**
@@ -41,6 +43,7 @@ import fun.my.easyexplorer.utils.Utils;
 public class FileExplorerActivity extends BaseActivity {
 
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
+    private static final String DEFAULT_FILE_SORT_TYPE = "name";
 
     protected int scrollPosition, childTop;
     private ListView file_ListView;
@@ -48,7 +51,7 @@ public class FileExplorerActivity extends BaseActivity {
     private FileListAdapter fileListAdapter;
     private RecyclerListAdapter recyclerListAdapter;
     //当前文件列表
-    private List<File> currentFileList;
+    private ArrayList<File> currentFileList;
     //打开文件顺序
     private ArrayList<File> cacheList;
     private Stack<Frame> fileStack;
@@ -120,6 +123,13 @@ public class FileExplorerActivity extends BaseActivity {
                 openItem(position);
             }
         });
+        file_ListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                intoEditMode(position);
+                return true;
+            }
+        });
         file_ListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -149,18 +159,24 @@ public class FileExplorerActivity extends BaseActivity {
                                                            File f = cacheList.get(position);
                                                            //压入栈中
                                                            fileStack.push(new Frame(f, new Point()));
-                                                           //cacheList重新赋值
                                                            loadData();
                                                        }
                                                    }
-
         );
+
+
+    }
+
+
+    public void sortFileBy(String type, ArrayList<File> files) {
+        Collections.sort(files, FileComparator.getComparator(type));
     }
 
     @Override
     protected void loadData() {
         cacheList.clear();
         cacheList.addAll(getParentFilesIncludingSelf(fileStack.peek().getFile()));
+
         //加载路径栏
         loadPathView(cacheList);
         //加载file list
@@ -169,7 +185,7 @@ public class FileExplorerActivity extends BaseActivity {
 
     //获取父文件列表包括自己
     private ArrayList<File> getParentFilesIncludingSelf(File currentFile) {
-        ArrayList<File> list = new ArrayList();
+        ArrayList<File> list = new ArrayList<File>();
         list.add(currentFile);
         File f = currentFile;
         while ((f = f.getParentFile()) != null) {
@@ -266,7 +282,7 @@ public class FileExplorerActivity extends BaseActivity {
         }
     }
 
-    private void loadPathView(List list) {
+    private void loadPathView(List<File> list) {
         recyclerListAdapter.notifyDataSetChanged();
         recyclerView.smoothScrollToPosition(list.size() - 1);
     }
@@ -277,13 +293,16 @@ public class FileExplorerActivity extends BaseActivity {
         currentFileList.clear();
         File[] files = currentFile.listFiles();
         if (files != null) {
+            //是否是选择界面
             if (isDir) {
                 currentFileList.addAll(getDirFiles(files));
             } else {
                 currentFileList.addAll(Arrays.asList(files));
             }
         }
-        fileListAdapter.notifyDataSetChanged();
+        //默认排序
+        sortFileBy(DEFAULT_FILE_SORT_TYPE, currentFileList);
+        fileListAdapter.notifyDataSetChangedInitList();
 
         if (p == null) {
             scrollPosition = 0;
@@ -307,6 +326,10 @@ public class FileExplorerActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        if (isInEditMode()) {
+            outEditMode();
+            return;
+        }
         int size = fileStack.size();
         if (size <= 1) {
             super.onBackPressed();
@@ -314,6 +337,24 @@ public class FileExplorerActivity extends BaseActivity {
             fileStack.pop();
             loadData();
         }
+    }
+
+    //判断是否在编辑
+    private boolean isInEditMode() {
+        return fileListAdapter.getIsEdit();
+    }
+
+    //进入编辑模式
+    private void intoEditMode(int position) {
+        fileListAdapter.setIsEdit(true);
+        fileListAdapter.setIsChecked(position, true);
+        fileListAdapter.notifyDataSetChanged();
+    }
+
+    //退出编辑模式
+    private void outEditMode() {
+        fileListAdapter.setIsEdit(false);
+        fileListAdapter.notifyDataSetChangedInitList();
     }
 
     @Override

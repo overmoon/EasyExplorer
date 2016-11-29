@@ -40,10 +40,9 @@ public class FileListAdapter extends BaseAdapter {
         this.files = files;
         initCheckList(files);
         layout_ID = R.layout.fileexplorer_listitem;
-        isEdit = true;
+        isEdit = false;
         initCheckBoxAnimation();
     }
-
 
     public FileListAdapter(Context context, List<File> files, int layout_ID) {
         this(context, files);
@@ -160,8 +159,12 @@ public class FileListAdapter extends BaseAdapter {
 
     @Override
     public void notifyDataSetChanged() {
-        initCheckList(files);
         super.notifyDataSetChanged();
+    }
+
+    public void notifyDataSetChangedInitList() {
+        initCheckList(files);
+        notifyDataSetChanged();
     }
 
     private void initCheckBoxAnimation() {
@@ -178,9 +181,25 @@ public class FileListAdapter extends BaseAdapter {
         }
     }
 
+    public boolean getIsEdit() {
+        return isEdit;
+    }
+
+    public void setIsEdit(boolean bool) {
+        isEdit = bool;
+    }
+
+    public void setIsChecked(int position, boolean isChecked) {
+        if (isCheckList != null && isCheckList.size() > position) {
+            isCheckList.set(position, isChecked);
+        }
+    }
+
     private class FileViewHolder {
         TextView fileName_TextView;
         ImageView fileIcon_ImageView;
         CheckBox file_checkBox;
     }
+
+
 }
