@@ -255,7 +255,7 @@ public class AddDialogActivity extends BaseActivity {
     private void startFileActivityForResult(Context context) {
         String path = MountPointUtils.GetMountPointInstance(context).getMemPath();
         Intent intent = new Intent(context, FileExplorerActivity.class);
-        intent.putExtra("isDir", true);
+        intent.putExtra("isDirMode", true);
         intent.putExtra("path", path);
         startActivityForResult(intent, Utils.REQUEST_PATH);
     }

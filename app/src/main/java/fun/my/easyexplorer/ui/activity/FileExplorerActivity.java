@@ -2,7 +2,9 @@ package fun.my.easyexplorer.ui.activity;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -55,8 +58,8 @@ public class FileExplorerActivity extends BaseActivity {
     //打开文件顺序
     private ArrayList<File> cacheList;
     private Stack<Frame> fileStack;
-
-    private boolean isDir;
+    //是否是选择文件夹模式
+    private boolean isDirMode;
     private LinearLayout buttonLayout;
 
     @Override
@@ -65,7 +68,7 @@ public class FileExplorerActivity extends BaseActivity {
         fileStack = new Stack<>();
         cacheList = new ArrayList<>();
         String path = getIntent().getStringExtra("path");
-        isDir = getIntent().getBooleanExtra("isDir", false);
+        isDirMode = getIntent().getBooleanExtra("isDirMode", false);
         File currentFile;
         if (!TextUtils.isEmpty(path)) {
             currentFile = new File(path);
@@ -88,7 +91,7 @@ public class FileExplorerActivity extends BaseActivity {
         //底部按钮栏
         buttonLayout = (LinearLayout) findViewById(R.id.buttonLinearLayout);
         //判断是否显示按钮栏
-        if (isDir) {
+        if (isDirMode) {
             buttonLayout.setVisibility(View.VISIBLE);
         }
         //取消按钮
@@ -164,12 +167,8 @@ public class FileExplorerActivity extends BaseActivity {
                                                    }
         );
 
+        initEditBar();
 
-    }
-
-
-    public void sortFileBy(String type, ArrayList<File> files) {
-        Collections.sort(files, FileComparator.getComparator(type));
     }
 
     @Override
@@ -181,6 +180,47 @@ public class FileExplorerActivity extends BaseActivity {
         loadPathView(cacheList);
         //加载file list
         loadFileListView(fileStack.peek());
+    }
+
+    //初始化colorStateList
+    private ColorStateList initButtonStateColorList(int normal, int pressed, int focused, int unable) {
+        int[] colors = new int[]{pressed, focused, normal, focused, unable, normal};
+        int[][] stateList = new int[6][];
+        stateList[0] = new int[]{android.R.attr.state_pressed, android.R.attr.state_enabled};
+        stateList[1] = new int[]{android.R.attr.state_enabled, android.R.attr.state_focused};
+        stateList[2] = new int[]{android.R.attr.state_enabled};
+        stateList[3] = new int[]{android.R.attr.state_focused};
+        stateList[4] = new int[]{android.R.attr.state_window_focused};
+        stateList[5] = new int[]{};
+        return new ColorStateList(stateList, colors);
+    }
+
+    //初始化编辑栏
+    private void initEditBar() {
+        int colorPressed = Utils.getThemeAttrColor(this, R.attr.myColorAccent);
+        int colorNormal = getResources().getColor(R.color.colorGrayWhite);
+        ColorStateList stateList = initButtonStateColorList(colorNormal, colorPressed, colorNormal, colorNormal);
+        Drawable drawable = Utils.tintDrawable(this, R.mipmap.edit, stateList);
+//        Drawable drawable = getResources().getDrawable(R.mipmap.edit);
+
+        TextView copyTextView = (TextView) findViewById(R.id.copy_textView);
+        TextView delTextView = (TextView) findViewById(R.id.del_textView);
+        TextView moveTextView = (TextView) findViewById(R.id.move_textView);
+        TextView moreTextView = (TextView) findViewById(R.id.more_textView);
+
+        setColorStateList(copyTextView, stateList, null, drawable, null, null);
+        setColorStateList(delTextView, stateList, null, drawable, null, null);
+        setColorStateList(moveTextView, stateList, null, drawable, null, null);
+        setColorStateList(moreTextView, stateList, null, drawable, null, null);
+    }
+
+    private void setColorStateList(TextView view, ColorStateList colorStateList, Drawable left, Drawable top, Drawable right, Drawable bottom) {
+        view.setTextColor(colorStateList);
+        view.setCompoundDrawablesWithIntrinsicBounds(left, top, right, bottom);
+    }
+
+    public void sortFileBy(String type, ArrayList<File> files) {
+        Collections.sort(files, FileComparator.getComparator(type));
     }
 
     //获取父文件列表包括自己
@@ -294,7 +334,7 @@ public class FileExplorerActivity extends BaseActivity {
         File[] files = currentFile.listFiles();
         if (files != null) {
             //是否是选择界面
-            if (isDir) {
+            if (isDirMode) {
                 currentFileList.addAll(getDirFiles(files));
             } else {
                 currentFileList.addAll(Arrays.asList(files));

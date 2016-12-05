@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -613,6 +614,18 @@ public class Utils {
 
     public static Drawable getDrawableFromFile(String file) {
         return BitmapDrawable.createFromPath(file);
+    }
+
+    public static Drawable tintDrawable(Drawable drawable, ColorStateList colors) {
+        final Drawable wrappedDrawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTintList(wrappedDrawable, colors);
+        return wrappedDrawable;
+    }
+
+    public static Drawable tintDrawable(Context context, int drawableId, ColorStateList colors) {
+        final Drawable wrappedDrawable = DrawableCompat.wrap(context.getResources().getDrawable(drawableId));
+        DrawableCompat.setTintList(wrappedDrawable, colors);
+        return wrappedDrawable;
     }
 
     public static int getThemeAttrColor(Context context, @AttrRes int colorAttr) {
