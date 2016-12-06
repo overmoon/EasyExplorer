@@ -74,12 +74,12 @@ public class FileListAdapter extends BaseAdapter {
         //set file name
         fileViewHolder.fileName_TextView.setText(file.getName());
         //set checkbox
-        fileViewHolder.file_checkBox.setOnClickListener(new View.OnClickListener() {
+  /*      fileViewHolder.file_checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isCheckList.set(position, ((CheckBox) v).isChecked());
             }
-        });
+        });*/
         if (!isEdit) {
             fileViewHolder.file_checkBox.setVisibility(View.GONE);
         } else {
@@ -192,6 +192,15 @@ public class FileListAdapter extends BaseAdapter {
     public void setIsChecked(int position, boolean isChecked) {
         if (isCheckList != null && isCheckList.size() > position) {
             isCheckList.set(position, isChecked);
+        }
+    }
+
+    //点击checkbox
+    public void setCheckBoxClicked(View view, int position) {
+        FileViewHolder viewHolder = (FileViewHolder) view.getTag();
+        if (viewHolder != null) {
+            viewHolder.file_checkBox.performClick();
+            isCheckList.set(position, viewHolder.file_checkBox.isChecked());
         }
     }
 

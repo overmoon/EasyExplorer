@@ -7,4 +7,5 @@
     <string name="confirm_string">确 定</string>
     <string name="edit_subItem_string">子项编辑</string>
     <string name="delete_string">删 除</string>
+    <string name="new_folder">新建文件夹</string>
 </resources>
