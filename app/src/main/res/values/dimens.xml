@@ -19,4 +19,5 @@
     <dimen name="dialog_heightSize">40dp</dimen>
     <dimen name="line_height">1dp</dimen>
     <dimen name="normalButtonRadius">3dp</dimen>
+    <dimen name="fileToolbarSize">45dp</dimen>
 </resources>

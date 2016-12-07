@@ -38,156 +38,37 @@
         android:id="@+id/file_listView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@+id/editBar_linearLayout"
         android:layout_below="@id/bottom_board"
+        android:layout_marginBottom="@dimen/fileToolbarSize"
         android:divider="@drawable/listview_divider"
         android:dividerHeight="1px" />
 
-
-    <LinearLayout
-        android:id="@+id/buttonLinearLayout"
+    <include
+        android:id="@+id/buttonbar_linearLayout"
+        layout="@layout/file_buttonbar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:visibility="gone">
+        android:layout_height="@dimen/fileToolbarSize"
+        android:layout_alignParentBottom="true" />
 
-        <Button
-            android:id="@+id/cancel_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/cancel_string" />
+    <include
+        android:id="@+id/toolBar_linearLayout"
+        layout="@layout/file_toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fileToolbarSize"
+        android:layout_alignParentBottom="true" />
 
-        <Button
-            android:id="@+id/confirm_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/confirm_string" />
-    </LinearLayout>
-
-    <LinearLayout
+    <include
         android:id="@+id/editBar_linearLayout"
+        layout="@layout/file_editbar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:orientation="horizontal">
+        android:layout_height="@dimen/fileToolbarSize"
+        android:layout_alignParentBottom="true" />
 
-        <TextView
-            android:id="@+id/newFolder_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="新建文件夹"
-            android:textSize="@dimen/smallTextSize" />
-
-        <TextView
-            android:id="@+id/search_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="搜索"
-            android:textSize="@dimen/smallTextSize" />
-
-        <TextView
-            android:id="@+id/sort_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="排序"
-            android:textSize="@dimen/smallTextSize" />
-
-        <TextView
-            android:id="@+id/menu_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="菜单"
-            android:textSize="@dimen/smallTextSize" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/editBar2_linearLayout"
+    <include
+        android:id="@+id/copyBar_linearLayout"
+        layout="@layout/copy_editbar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:visibility="gone">
+        android:layout_height="@dimen/fileToolbarSize"
+        android:layout_alignParentBottom="true" />
 
-        <TextView
-            android:id="@+id/copy_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="复制"
-            android:textSize="@dimen/smallTextSize" />
-
-        <TextView
-            android:id="@+id/move_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="移动"
-            android:textSize="@dimen/smallTextSize" />
-
-        <TextView
-            android:id="@+id/del_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="删除"
-            android:textSize="@dimen/smallTextSize" />
-
-        <TextView
-            android:id="@+id/more_textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:drawablePadding="3dp"
-            android:drawableTop="@mipmap/edit"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="更多"
-            android:textSize="@dimen/smallTextSize" />
-
-    </LinearLayout>
 </RelativeLayout>

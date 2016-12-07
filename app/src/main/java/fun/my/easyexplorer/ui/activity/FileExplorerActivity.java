@@ -1,6 +1,7 @@
 package fun.my.easyexplorer.ui.activity;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -42,25 +43,83 @@ import fun.my.easyexplorer.ui.adapter.RecyclerListAdapter;
 import fun.my.easyexplorer.utils.FileComparator;
 import fun.my.easyexplorer.utils.Utils;
 
+import static fun.my.easyexplorer.ui.activity.FileExplorerActivity.Mode.EDIT;
+import static fun.my.easyexplorer.ui.activity.FileExplorerActivity.Mode.NORMAL;
+
 /**
  * Created by admin on 2016/9/10.
  */
 public class FileExplorerActivity extends BaseActivity {
+
     private static final int READ_EXTERNAL_STORAGE_REQUEST_CODE = 0;
     private static final String DEFAULT_FILE_SORT_TYPE = "name";
     protected int scrollPosition, childTop;
     private ListView file_ListView;
     private RecyclerView recyclerView;
-    private LinearLayout edit_linearLayout, edit2_linearLayout;
+    private LinearLayout toolBar_linearLayout, editBar_linearLayout, buttonBar_linearLayout, copyBar_linearLayout;
+    private TextView copyTextView, delTextView, moveTextView;
     private FileListAdapter fileListAdapter;
     private RecyclerListAdapter recyclerListAdapter;
     //当前文件列表
     private ArrayList<File> currentFileList;
+    private ArrayList<File> selectedFiles;
     //打开文件顺序
     private ArrayList<File> cacheList;
     private Stack<Frame> fileStack;
-    private MODE mode = MODE.NORMAL;
-    private LinearLayout buttonLayout;
+    //新建文件夹按钮监听
+    View.OnClickListener newFolderListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(FileExplorerActivity.this);
+            View view = getLayoutInflater().inflate(R.layout.new_folder_dialog, null);
+            builder.setView(view);
+            final Dialog dialog = builder.create();
+            final EditText editText = (EditText) view.findViewById(R.id.folderName_editText);
+            editText.setText(R.string.new_folder);
+            editText.setSelection(0, editText.getText().length());
+            //获得焦点时弹出输入法
+            editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                    }
+                }
+            });
+            editText.requestFocus();
+            // 取消按钮
+            Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
+            cancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+            // 确定按钮
+            Button confirmButton = (Button) view.findViewById(R.id.confirm_button);
+            confirmButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String folderName = editText.getText().toString();
+                    if (TextUtils.isEmpty(folderName)) {
+                        Utils.messageShort(FileExplorerActivity.this, "文件夹不能为空");
+                    } else {
+                        File f = new File(getCurrentPath() + File.separator + folderName);
+                        if (f.exists()) {
+                            Utils.messageShort(FileExplorerActivity.this, "文件夹已存在，请换个文件夹名");
+                        } else {
+                            f.mkdir();
+                            loadData();
+                            Utils.messageShort(FileExplorerActivity.this, "文件夹创建成功");
+                            dialog.dismiss();
+                        }
+                    }
+                }
+            });
+            dialog.show();
+        }
+    };
+    private Mode mode;
 
     @Override
     protected void initVariables() {
@@ -68,7 +127,8 @@ public class FileExplorerActivity extends BaseActivity {
         fileStack = new Stack<>();
         cacheList = new ArrayList<>();
         String path = getIntent().getStringExtra("path");
-        mode = (MODE) getIntent().getSerializableExtra("mode");
+        mode = (Mode) getIntent().getSerializableExtra("mode");
+        mode = mode == null ? NORMAL : mode;
         File currentFile;
         if (!TextUtils.isEmpty(path)) {
             currentFile = new File(path);
@@ -88,34 +148,7 @@ public class FileExplorerActivity extends BaseActivity {
     @Override
     protected void initViews(Bundle savedInstanceState) {
         setContentView(R.layout.activity_fileexplorer);
-        //底部按钮栏
-        buttonLayout = (LinearLayout) findViewById(R.id.buttonLinearLayout);
-        //判断是否显示按钮栏
-        if (mode == MODE.DIR) {
-            buttonLayout.setVisibility(View.VISIBLE);
-        }
-        //取消按钮
-        Button cancelButton = (Button) findViewById(R.id.cancel_button);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setResult(RESULT_CANCELED);
-                finish();
-            }
-        });
-        //确认按钮
-        Button confirmButton = (Button) findViewById(R.id.confirm_button);
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                //获取当前路径
-                String path = getCurrentPath();
-                intent.putExtra("path", path);
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-        });
+
         //fileList init
         file_ListView = (ListView) findViewById(R.id.file_listView);
         file_ListView.setAdapter(fileListAdapter);
@@ -124,8 +157,10 @@ public class FileExplorerActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //编辑模式下，转化为点击checkbox
-                if (mode == MODE.EDIT) {
+                if (mode == EDIT) {
                     fileListAdapter.setCheckBoxClicked(view, position);
+                    selectedFiles = fileListAdapter.getSelectedFiles();
+                    onSelectedFilesChanged();
                 } else {
                     openItem(position);
                 }
@@ -134,7 +169,9 @@ public class FileExplorerActivity extends BaseActivity {
         file_ListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                intoEditMode(position);
+                intoMode(EDIT, position);
+                selectedFiles = fileListAdapter.getSelectedFiles();
+                onSelectedFilesChanged();
                 return true;
             }
         });
@@ -171,9 +208,20 @@ public class FileExplorerActivity extends BaseActivity {
                                                        }
                                                    }
         );
-
         //编辑菜单栏
         initEditBars();
+        //按模式显示
+        intoMode(mode, -1);
+    }
+
+    //选中文件发生变化时
+    private void onSelectedFilesChanged() {
+        int size = selectedFiles.size();
+        boolean clickable = (size != 0);
+        copyTextView.setEnabled(clickable);
+        delTextView.setEnabled(clickable);
+        moveTextView.setEnabled(clickable);
+        //已选中...个
 
     }
 
@@ -188,6 +236,53 @@ public class FileExplorerActivity extends BaseActivity {
         loadFileListView(fileStack.peek());
     }
 
+    //模式切换
+    private void intoMode(Mode intoMode, int position) {
+        mode = intoMode;
+        switch (mode) {
+            case NORMAL:
+                intoNormalMode();
+                break;
+            case DIR:
+                toolBar_linearLayout.setVisibility(View.GONE);
+                editBar_linearLayout.setVisibility(View.GONE);
+                buttonBar_linearLayout.setVisibility(View.VISIBLE);
+                copyBar_linearLayout.setVisibility(View.GONE);
+                break;
+            case COPY:
+                toolBar_linearLayout.setVisibility(View.GONE);
+                editBar_linearLayout.setVisibility(View.GONE);
+                buttonBar_linearLayout.setVisibility(View.GONE);
+                copyBar_linearLayout.setVisibility(View.VISIBLE);
+                break;
+            case EDIT:
+                intoEditMode(position);
+                break;
+        }
+    }
+
+    //进入编辑模式
+    private void intoEditMode(int position) {
+        toolBar_linearLayout.setVisibility(View.GONE);
+        editBar_linearLayout.setVisibility(View.VISIBLE);
+        buttonBar_linearLayout.setVisibility(View.GONE);
+        copyBar_linearLayout.setVisibility(View.GONE);
+
+        fileListAdapter.setIsEdit(true);
+        fileListAdapter.setIsChecked(position, true);
+        fileListAdapter.notifyDataSetChanged();
+    }
+
+    //进入正常模式
+    private void intoNormalMode() {
+        toolBar_linearLayout.setVisibility(View.VISIBLE);
+        editBar_linearLayout.setVisibility(View.GONE);
+        buttonBar_linearLayout.setVisibility(View.GONE);
+        copyBar_linearLayout.setVisibility(View.GONE);
+
+        fileListAdapter.setIsEdit(false);
+        fileListAdapter.notifyDataSetChangedInitList();
+    }
     //初始化colorStateList
     private ColorStateList initButtonStateColorList(int normal, int pressed, int focused, int unable) {
         int[] colors = new int[]{pressed, focused, normal, focused, unable, normal};
@@ -196,78 +291,92 @@ public class FileExplorerActivity extends BaseActivity {
         stateList[1] = new int[]{android.R.attr.state_enabled, android.R.attr.state_focused};
         stateList[2] = new int[]{android.R.attr.state_enabled};
         stateList[3] = new int[]{android.R.attr.state_focused};
-        stateList[4] = new int[]{android.R.attr.state_window_focused};
+        stateList[4] = new int[]{-android.R.attr.state_enabled};
         stateList[5] = new int[]{};
         return new ColorStateList(stateList, colors);
     }
-
     //初始化编辑栏
     private void initEditBars() {
-        //初始化layout
-        edit_linearLayout = (LinearLayout) findViewById(R.id.editBar_linearLayout);
-        edit2_linearLayout = (LinearLayout) findViewById(R.id.editBar2_linearLayout);
         //初始化colorStateList
         int colorPressed = Utils.getThemeAttrColor(this, R.attr.myColorAccent);
         int colorNormal = getResources().getColor(R.color.colorGrayWhite);
-        ColorStateList stateList = initButtonStateColorList(colorNormal, colorPressed, colorNormal, colorNormal);
+        int colorUnable = getResources().getColor(R.color.colorGrayDark);
+        ColorStateList stateList = initButtonStateColorList(colorNormal, colorPressed, colorNormal, colorUnable);
 
         //初始化编辑栏1
-        initEditBar1(stateList);
+        initToolBar(stateList);
         //初始化编辑栏2
-        initEditBar2(stateList);
-
+        initEditBar(stateList);
+        //初始化按钮栏
+        initButtonBar();
+        //初始化copyBar
+        initCopyBar(stateList);
     }
 
-    // 初始化编辑栏1
-    private void initEditBar1(ColorStateList stateList) {
+    //初始化copy菜单栏
+    private void initCopyBar(ColorStateList stateList) {
+        copyBar_linearLayout = (LinearLayout) findViewById(R.id.copyBar_linearLayout);
         Drawable drawable = Utils.tintDrawable(this, R.mipmap.edit, stateList);
-        TextView newTextView = (TextView) findViewById(R.id.newFolder_textView);
         //新建文件夹
-        newTextView.setOnClickListener(new View.OnClickListener() {
+        TextView copyNewFolderTextView = (TextView) copyBar_linearLayout.findViewById(R.id.copy_newFolder_textView);
+        copyNewFolderTextView.setOnClickListener(newFolderListener);
+        //取消
+        TextView cancelTextView = (TextView) copyBar_linearLayout.findViewById(R.id.cancel_textView);
+        cancelTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(FileExplorerActivity.this);
-                View view = getLayoutInflater().inflate(R.layout.new_folder_dialog, null);
-                builder.setView(view);
-                final Dialog dialog = builder.create();
-                final EditText editText = (EditText) view.findViewById(R.id.folderName_editText);
-                editText.setText(R.string.new_folder);
-                editText.setSelection(0, editText.getText().length());
-                // 取消按钮
-                Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
-                cancelButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-                // 确定按钮
-                Button confirmButton = (Button) view.findViewById(R.id.confirm_button);
-                confirmButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String folderName = editText.getText().toString();
-                        if (TextUtils.isEmpty(folderName)) {
-                            Utils.messageShort(FileExplorerActivity.this, "文件夹不能为空");
-                        } else {
-                            File f = new File(getCurrentPath() + File.separator + folderName);
-                            if (f.exists()) {
-                                Utils.messageShort(FileExplorerActivity.this, "文件夹已存在，请换个文件夹名");
-                            } else {
-                                f.mkdir();
-                                loadData();
-                                Utils.messageShort(FileExplorerActivity.this, "文件夹创建成功");
-                                dialog.dismiss();
-                            }
-                        }
-                    }
-                });
-                dialog.show();
+                intoMode(NORMAL, -1);
             }
         });
-        TextView searchTextView = (TextView) findViewById(R.id.search_textView);
-        TextView sortTextView = (TextView) findViewById(R.id.sort_textView);
-        TextView menuTextView = (TextView) findViewById(R.id.menu_textView);
+        //粘贴
+        TextView parseTextView = (TextView) copyBar_linearLayout.findViewById(R.id.parse_textView);
+
+        setColorStateList(copyNewFolderTextView, stateList, null, drawable, null, null);
+        setColorStateList(cancelTextView, stateList, null, drawable, null, null);
+        setColorStateList(parseTextView, stateList, null, drawable, null, null);
+    }
+
+    //初始化按钮栏
+    private void initButtonBar() {
+        //底部按钮栏
+        buttonBar_linearLayout = (LinearLayout) findViewById(R.id.buttonbar_linearLayout);
+        //取消按钮
+        Button cancelButton = (Button) buttonBar_linearLayout.findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+        //确认按钮
+        Button confirmButton = (Button) buttonBar_linearLayout.findViewById(R.id.confirm_button);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                //获取当前路径
+                String path = getCurrentPath();
+                intent.putExtra("path", path);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
+    }
+
+    //初始化功能栏
+    private void initToolBar(ColorStateList stateList) {
+        toolBar_linearLayout = (LinearLayout) findViewById(R.id.toolBar_linearLayout);
+        Drawable drawable = Utils.tintDrawable(this, R.mipmap.edit, stateList);
+        TextView newTextView = (TextView) toolBar_linearLayout.findViewById(R.id.newFolder_textView);
+        //新建文件夹
+        newTextView.setOnClickListener(newFolderListener);
+        //搜索
+        TextView searchTextView = (TextView) toolBar_linearLayout.findViewById(R.id.search_textView);
+        //排序
+        TextView sortTextView = (TextView) toolBar_linearLayout.findViewById(R.id.sort_textView);
+        //菜单
+        TextView menuTextView = (TextView) toolBar_linearLayout.findViewById(R.id.menu_textView);
 
         setColorStateList(newTextView, stateList, null, drawable, null, null);
         setColorStateList(searchTextView, stateList, null, drawable, null, null);
@@ -275,13 +384,48 @@ public class FileExplorerActivity extends BaseActivity {
         setColorStateList(menuTextView, stateList, null, drawable, null, null);
     }
 
-    //初始化编辑栏2
-    private void initEditBar2(ColorStateList stateList) {
+    //初始化编辑栏
+    private void initEditBar(ColorStateList stateList) {
+        editBar_linearLayout = (LinearLayout) findViewById(R.id.editBar_linearLayout);
         Drawable drawable = Utils.tintDrawable(this, R.mipmap.edit, stateList);
-        TextView copyTextView = (TextView) findViewById(R.id.copy_textView);
-        TextView delTextView = (TextView) findViewById(R.id.del_textView);
-        TextView moveTextView = (TextView) findViewById(R.id.move_textView);
-        TextView moreTextView = (TextView) findViewById(R.id.more_textView);
+        //复制
+        copyTextView = (TextView) editBar_linearLayout.findViewById(R.id.copy_textView);
+        copyTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        //删除
+        delTextView = (TextView) editBar_linearLayout.findViewById(R.id.del_textView);
+        delTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectedFiles = getSelectedFiles();
+                AlertDialog alertDialog = new AlertDialog.Builder(FileExplorerActivity.this)
+                        .setMessage("确定删除选中的" + selectedFiles.size() + "个文件？")
+                        .setPositiveButton(R.string.confirm_string, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                delSelectedFiles();
+                                loadData();
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel_string, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .create();
+                alertDialog.show();
+            }
+        });
+        //移动
+        moveTextView = (TextView) editBar_linearLayout.findViewById(R.id.move_textView);
+        //更多
+        TextView moreTextView = (TextView) editBar_linearLayout.findViewById(R.id.more_textView);
 
         setColorStateList(copyTextView, stateList, null, drawable, null, null);
         setColorStateList(delTextView, stateList, null, drawable, null, null);
@@ -289,11 +433,24 @@ public class FileExplorerActivity extends BaseActivity {
         setColorStateList(moreTextView, stateList, null, drawable, null, null);
     }
 
+    //删除选中的文件
+    private void delSelectedFiles() {
+        for (File f : selectedFiles) {
+            f.delete();
+        }
+    }
+
+    //获取选中文件
+    private ArrayList<File> getSelectedFiles() {
+        return fileListAdapter.getSelectedFiles();
+    }
+
     private void setColorStateList(TextView view, ColorStateList colorStateList, Drawable left, Drawable top, Drawable right, Drawable bottom) {
         view.setTextColor(colorStateList);
         view.setCompoundDrawablesWithIntrinsicBounds(left, top, right, bottom);
     }
 
+    //获取当前路径
     private String getCurrentPath() {
         return fileStack.peek().getFile().getAbsolutePath();
     }
@@ -330,7 +487,7 @@ public class FileExplorerActivity extends BaseActivity {
         if (f.canRead()) {
             if (f.isDirectory()) {
                 openDir(f);
-            } else if (mode == MODE.NORMAL) { //正常模式下打开文件
+            } else if (mode == NORMAL) { //正常模式下打开文件
                 openFile(f);
             }
         } else {
@@ -441,7 +598,7 @@ public class FileExplorerActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (isInEditMode()) {
-            outEditMode();
+            intoMode(NORMAL, -1);
             return;
         }
         int size = fileStack.size();
@@ -455,26 +612,7 @@ public class FileExplorerActivity extends BaseActivity {
 
     //判断是否在编辑
     private boolean isInEditMode() {
-        return fileListAdapter.getIsEdit();
-    }
-
-    //进入编辑模式
-    private void intoEditMode(int position) {
-        mode = MODE.EDIT;
-        fileListAdapter.setIsEdit(true);
-        fileListAdapter.setIsChecked(position, true);
-        fileListAdapter.notifyDataSetChanged();
-        edit_linearLayout.setVisibility(View.INVISIBLE);
-        edit2_linearLayout.setVisibility(View.VISIBLE);
-    }
-
-    //退出编辑模式
-    private void outEditMode() {
-        mode = MODE.NORMAL;
-        fileListAdapter.setIsEdit(false);
-        fileListAdapter.notifyDataSetChangedInitList();
-        edit2_linearLayout.setVisibility(View.GONE);
-        edit_linearLayout.setVisibility(View.VISIBLE);
+        return mode == EDIT;
     }
 
     @Override
@@ -493,8 +631,7 @@ public class FileExplorerActivity extends BaseActivity {
         }
     }
 
-    public enum MODE {
+    public enum Mode {
         DIR, NORMAL, EDIT, MOVE, COPY, SEARCH
     }
-
 }

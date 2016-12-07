@@ -168,7 +168,7 @@ public class EditDialogActivity extends BaseActivity {
             path = MountPointUtils.GetMountPointInstance(context).getMemPath();
         }
         Intent intent = new Intent(context, FileExplorerActivity.class);
-        intent.putExtra("mode", FileExplorerActivity.MODE.DIR);
+        intent.putExtra("mode", FileExplorerActivity.Mode.DIR);
         intent.putExtra("path", path);
         startActivityForResult(intent, Utils.REQUEST_PATH);
     }

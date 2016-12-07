@@ -8,4 +8,5 @@
     <string name="edit_subItem_string">子项编辑</string>
     <string name="delete_string">删 除</string>
     <string name="new_folder">新建文件夹</string>
+    <string name="parse_string">粘贴</string>
 </resources>

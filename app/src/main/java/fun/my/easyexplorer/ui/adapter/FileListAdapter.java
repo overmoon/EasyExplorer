@@ -74,7 +74,7 @@ public class FileListAdapter extends BaseAdapter {
         //set file name
         fileViewHolder.fileName_TextView.setText(file.getName());
         //set checkbox
-  /*      fileViewHolder.file_checkBox.setOnClickListener(new View.OnClickListener() {
+       /* fileViewHolder.file_checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isCheckList.set(position, ((CheckBox) v).isChecked());
@@ -195,13 +195,24 @@ public class FileListAdapter extends BaseAdapter {
         }
     }
 
-    //点击checkbox
+    //item的点击点击转化为点击checkbox
     public void setCheckBoxClicked(View view, int position) {
         FileViewHolder viewHolder = (FileViewHolder) view.getTag();
         if (viewHolder != null) {
             viewHolder.file_checkBox.performClick();
             isCheckList.set(position, viewHolder.file_checkBox.isChecked());
         }
+    }
+
+    public ArrayList<File> getSelectedFiles() {
+        int size = files.size();
+        ArrayList selectedFiles = new ArrayList();
+        for (int i = 0; i < size; i++) {
+            if (isCheckList.get(i)) {
+                selectedFiles.add(files.get(i));
+            }
+        }
+        return selectedFiles;
     }
 
     private class FileViewHolder {
