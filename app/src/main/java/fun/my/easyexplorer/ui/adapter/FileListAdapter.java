@@ -73,13 +73,7 @@ public class FileListAdapter extends BaseAdapter {
 
         //set file name
         fileViewHolder.fileName_TextView.setText(file.getName());
-        //set checkbox
-       /* fileViewHolder.file_checkBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isCheckList.set(position, ((CheckBox) v).isChecked());
-            }
-        });*/
+
         if (!isEdit) {
             fileViewHolder.file_checkBox.setVisibility(View.GONE);
         } else {
@@ -93,9 +87,15 @@ public class FileListAdapter extends BaseAdapter {
 
     //设置文件图标
     private void setFileIcon(ImageView fileIcon_imageView, File file) {
+        String uri = Uri.fromFile(file).toString();
+        String tag = getTag(fileIcon_imageView);
+        //如果图片相同则返回
+        if (uri.equals(tag))
+            return;
+
+        fileIcon_imageView.setTag(R.id.file_icon, uri);
         String mimeType = Utils.getMimeType(file);
         FileType f = FileType.mimeTypeOf(mimeType);
-        String uri = Uri.fromFile(file).toString();
 
         DisplayOption.Builder builder = new DisplayOption.Builder();
         builder.setImageView(fileIcon_imageView)
@@ -125,15 +125,28 @@ public class FileListAdapter extends BaseAdapter {
 
     //设置文件夹图标
     private void setFolderIcon(ImageView fileIcon_imageView, File file) {
-        int icon_id = 0;
+        int icon_id;
         if (file.list() == null || file.list().length == 0) {
             icon_id = R.mipmap.ic_folder_empty;
         } else {
             icon_id = R.mipmap.ic_folder;
         }
-        fileIcon_imageView.setImageResource(icon_id);
+        String resId = getTag(fileIcon_imageView);
+
+        if (!resId.equals(String.valueOf(icon_id))) {
+            fileIcon_imageView.setImageResource(icon_id);
+            fileIcon_imageView.setTag(R.id.file_icon, icon_id);
+        }
     }
 
+    private String getTag(ImageView imageView) {
+        Object object = imageView.getTag(R.id.file_icon);
+        String resId = "";
+        if (object != null) {
+            resId = String.valueOf(object);
+        }
+        return resId;
+    }
     @Override
     public int getCount() {
         return files.size();

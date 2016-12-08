@@ -29,6 +29,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +47,7 @@ import fun.my.easyexplorer.ui.adapter.RecyclerListAdapter;
 import fun.my.easyexplorer.utils.FileComparator;
 import fun.my.easyexplorer.utils.Utils;
 
+import static fun.my.easyexplorer.ui.activity.FileExplorerActivity.Mode.COPY;
 import static fun.my.easyexplorer.ui.activity.FileExplorerActivity.Mode.EDIT;
 import static fun.my.easyexplorer.ui.activity.FileExplorerActivity.Mode.NORMAL;
 
@@ -67,7 +72,7 @@ public class FileExplorerActivity extends BaseActivity {
     private ArrayList<File> cacheList;
     private Stack<Frame> fileStack;
     //新建文件夹按钮监听
-    View.OnClickListener newFolderListener = new View.OnClickListener() {
+    private View.OnClickListener newFolderListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AlertDialog.Builder builder = new AlertDialog.Builder(FileExplorerActivity.this);
@@ -169,9 +174,11 @@ public class FileExplorerActivity extends BaseActivity {
         file_ListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                intoMode(EDIT, position);
-                selectedFiles = fileListAdapter.getSelectedFiles();
-                onSelectedFilesChanged();
+                if (mode != EDIT) {
+                    intoMode(EDIT, position);
+                    selectedFiles = fileListAdapter.getSelectedFiles();
+                    onSelectedFilesChanged();
+                }
                 return true;
             }
         });
@@ -244,21 +251,41 @@ public class FileExplorerActivity extends BaseActivity {
                 intoNormalMode();
                 break;
             case DIR:
-                toolBar_linearLayout.setVisibility(View.GONE);
-                editBar_linearLayout.setVisibility(View.GONE);
-                buttonBar_linearLayout.setVisibility(View.VISIBLE);
-                copyBar_linearLayout.setVisibility(View.GONE);
+                intoDirMode();
                 break;
             case COPY:
-                toolBar_linearLayout.setVisibility(View.GONE);
-                editBar_linearLayout.setVisibility(View.GONE);
-                buttonBar_linearLayout.setVisibility(View.GONE);
-                copyBar_linearLayout.setVisibility(View.VISIBLE);
+                intoCopyMode();
                 break;
             case EDIT:
                 intoEditMode(position);
                 break;
+            case MOVE:
+                intoMoveMode();
         }
+    }
+
+    //进入移动模式
+    private void intoMoveMode() {
+
+    }
+
+    //进入路径选择模式
+    private void intoDirMode() {
+        toolBar_linearLayout.setVisibility(View.GONE);
+        editBar_linearLayout.setVisibility(View.GONE);
+        buttonBar_linearLayout.setVisibility(View.VISIBLE);
+        copyBar_linearLayout.setVisibility(View.GONE);
+    }
+
+    //进入复制模式
+    private void intoCopyMode() {
+        fileListAdapter.setIsEdit(false);
+        fileListAdapter.notifyDataSetChanged();
+
+        toolBar_linearLayout.setVisibility(View.GONE);
+        editBar_linearLayout.setVisibility(View.GONE);
+        buttonBar_linearLayout.setVisibility(View.GONE);
+        copyBar_linearLayout.setVisibility(View.VISIBLE);
     }
 
     //进入编辑模式
@@ -283,6 +310,7 @@ public class FileExplorerActivity extends BaseActivity {
         fileListAdapter.setIsEdit(false);
         fileListAdapter.notifyDataSetChangedInitList();
     }
+
     //初始化colorStateList
     private ColorStateList initButtonStateColorList(int normal, int pressed, int focused, int unable) {
         int[] colors = new int[]{pressed, focused, normal, focused, unable, normal};
@@ -295,7 +323,8 @@ public class FileExplorerActivity extends BaseActivity {
         stateList[5] = new int[]{};
         return new ColorStateList(stateList, colors);
     }
-    //初始化编辑栏
+
+    //初始化各种栏
     private void initEditBars() {
         //初始化colorStateList
         int colorPressed = Utils.getThemeAttrColor(this, R.attr.myColorAccent);
@@ -330,7 +359,13 @@ public class FileExplorerActivity extends BaseActivity {
         });
         //粘贴
         TextView parseTextView = (TextView) copyBar_linearLayout.findViewById(R.id.parse_textView);
-
+        parseTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                parseSelectedFiles(selectedFiles, getCurrentPath(), false);
+                loadData();
+            }
+        });
         setColorStateList(copyNewFolderTextView, stateList, null, drawable, null, null);
         setColorStateList(cancelTextView, stateList, null, drawable, null, null);
         setColorStateList(parseTextView, stateList, null, drawable, null, null);
@@ -393,7 +428,7 @@ public class FileExplorerActivity extends BaseActivity {
         copyTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                intoMode(COPY, -1);
             }
         });
         //删除
@@ -407,7 +442,7 @@ public class FileExplorerActivity extends BaseActivity {
                         .setPositiveButton(R.string.confirm_string, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                delSelectedFiles();
+                                delSelectedFiles(selectedFiles);
                                 loadData();
                                 dialog.dismiss();
                             }
@@ -433,10 +468,78 @@ public class FileExplorerActivity extends BaseActivity {
         setColorStateList(moreTextView, stateList, null, drawable, null, null);
     }
 
+    /**
+     * 复制选中的文件
+     * dir: 复制到的路径
+     * overlap: 是否覆盖原有文件
+     */
+    private void parseSelectedFiles(ArrayList<File> selectedFiles, String dir, boolean overlap) {
+        for (File file : selectedFiles) {
+            copyFileToDest(file, dir, overlap);
+        }
+    }
+
+    //拷贝文件或文件夹
+    private void copyFileToDest(File file, String dir, boolean overlap) {
+        String fileName = file.getName();
+        File fileNew = new File(dir + File.separator + fileName);
+        if (fileNew.exists()) {
+            //是否覆盖
+            if (overlap) {
+                fileNew.delete();
+            } else {
+                fileNew = new File(dir + File.separator + getResources().getString(R.string.file_copy) + "_" + fileName);
+            }
+        }
+        //如果是目录，则创建新文件夹，并递归copy子文件
+        if (file.isDirectory()) {
+            fileNew.mkdir();
+            File[] files = file.listFiles();
+            String path = fileNew.getAbsolutePath();
+            for (File tmpFile : files) {
+                copyFileToDest(tmpFile, path, overlap);
+            }
+        } else {
+            //如果是文件，则拷贝文件
+            try {
+                copyFileItem(file, fileNew);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //将一个文件拷贝为另一个文件
+    private void copyFileItem(File file, File fileNew) throws IOException {
+        FileChannel inC = new FileInputStream(file).getChannel();
+        FileChannel outC = new FileOutputStream(fileNew).getChannel();
+        outC.transferFrom(inC, 0, inC.size());
+        inC.close();
+        outC.close();
+    }
+
     //删除选中的文件
-    private void delSelectedFiles() {
+    private void delSelectedFiles(ArrayList<File> selectedFiles) {
         for (File f : selectedFiles) {
-            f.delete();
+            deleteFile(f);
+        }
+    }
+
+    private boolean deleteFile(File f) {
+        if (f.isDirectory()) {
+            File[] files = f.listFiles();
+            if (files.length == 0) {
+                return f.delete();
+            } else {
+                //删除子文件
+                for (File tmp : files) {
+                    deleteFile(tmp);
+                }
+                //删除文件夹本身
+                return f.delete();
+            }
+        } else {
+            return f.delete();
         }
     }
 
